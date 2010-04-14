@@ -43,18 +43,4 @@ namespace Pinta.Core
 			get { return false; }
 		}
 	}
-			
-	public class CloneStampTool : BaseTool
-	{
-		public override string Name {
-			get { return "Clone Stamp"; }
-		}
-		public override string Icon {
-			get { return "Tools.CloneStamp.png"; }
-		}
-		public override bool Enabled {
-			get { return false; }
-		}
-	}
-			
 }
