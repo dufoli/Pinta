@@ -33,17 +33,39 @@ namespace Pinta.Gui.Widgets
 	[System.ComponentModel.ToolboxItem(true)]
 	public partial class TabStrip : Gtk.DrawingArea
 	{
+		private const double BorderSize = 10.0;
 		private List<ImageSurface> thumbnails;
 		int offset;
 		int selectedIndex;
-
+		
+		public int SelectedIndex {
+			get {
+				return selectedIndex;
+			}
+			set {
+				if (selectedIndex != value) {
+					selectedIndex = value;
+					OnChanged ();
+				}
+			}
+		}
+		
 		public TabStrip ()
 		{
-			this.Build ();
+			Events = ((Gdk.EventMask)(16134));
+			
 			thumbnails = new List<ImageSurface> ();
 			offset = 0;
 			selectedIndex = 0;
-			
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
 			//FOR testing add a static list of image.
 		}
 		
@@ -51,8 +73,12 @@ namespace Pinta.Gui.Widgets
 		{
 			base.OnExposeEvent (ev);
 			
-			Rectangle rect = GdkWindow.GetBounds ();
-			using (Cairo.Context g = CairoHelper.Create (GdkWindow)) {
+			int rectWidth;
+			int rectHeight;
+			
+			GdkWindow.GetSize (out rectWidth, out rectHeight);
+			
+			using (Cairo.Context g = Gdk.CairoHelper.Create (GdkWindow)) {
 				if (offset > 0) {
 					g.MoveTo (1, -30);
 					g.LineTo (6, -25);
@@ -64,16 +90,16 @@ namespace Pinta.Gui.Widgets
 					//todo draw image gradient of thumbnails[offset -1]
 				}
 				
-				double pos = 10.0;
+				double pos = BorderSize;
 				for (int i = offset; i< thumbnails.Count ; i++) {
 					ImageSurface thumbnail = thumbnails[i];
 					
-					if (10 + thumbnail.Width  > rect.Width -10) {
+					if (BorderSize + thumbnail.Width  > rectWidth - BorderSize) {
 						//rectangle
-						g.MoveTo (rect.Width -1, -30);
-						g.LineTo (rect.Width -6, -25);
-						g.LineTo (rect.Width -6, -35);
-						g.LineTo (rect.Width -1, -30);
+						g.MoveTo (rectWidth -1, -30);
+						g.LineTo (rectWidth -6, -25);
+						g.LineTo (rectWidth -6, -35);
+						g.LineTo (rectWidth -1, -30);
 						g.ClosePath ();
 						g.Color = new Color (0,0,0);
 						g.Fill();
@@ -83,8 +109,8 @@ namespace Pinta.Gui.Widgets
 					
 					if (i == selectedIndex) {
 						g.MoveTo (pos - 2.0, 0.0);
-						g.LineTo (pos - 2.0, rect.Height);
-						g.LineTo (pos + 2.0 + thumbnail.Width, rect.Height);
+						g.LineTo (pos - 2.0, rectHeight);
+						g.LineTo (pos + 2.0 + thumbnail.Width, rectHeight);
 						g.LineTo (pos + 2.0 + thumbnail.Width, 0.0);
 						g.LineTo (pos - 2.0, 0.0);
 						g.Color = new Color (0, 0.10, 0.75, 0.75);
@@ -92,11 +118,11 @@ namespace Pinta.Gui.Widgets
 						//TODO Stroke
 					}
 					
-					g.MoveTo (pos, rect.Height -2);
-					g.LineTo (pos, rect.Height -2 - thumbnail.Height);
-					g.LineTo (pos + thumbnail.Width, rect.Height -2 - thumbnail.Height);
-					g.LineTo (pos + thumbnail.Width, rect.Height -2);
-					g.LineTo (pos, rect.Height -2);
+					g.MoveTo (pos, rectHeight -2);
+					g.LineTo (pos, rectHeight -2 - thumbnail.Height);
+					g.LineTo (pos + thumbnail.Width, rectHeight -2 - thumbnail.Height);
+					g.LineTo (pos + thumbnail.Width, rectHeight -2);
+					g.LineTo (pos, rectHeight -2);
 					g.Color = new Color (0,0,0);
 					g.Stroke ();
 					
@@ -105,30 +131,36 @@ namespace Pinta.Gui.Widgets
 					pos += thumbnail.Width + 4;
 				}
 			}
+			return true;
 		}
 		
 		protected override bool OnButtonPressEvent (Gdk.EventButton evnt)
 		{
 			return base.OnButtonPressEvent (evnt);
-			if (evnt.Button = 1) { //left
-				if (evnt.X < 10.0)
+			if (evnt.Button == 1) { //left
+				if (evnt.X < BorderSize)
 					offset--;
-				else if (evnt.X > this.Allocation.Width - 10.0)
+				else if (evnt.X > this.Allocation.Width - BorderSize)
 					offset++;
-				else
-					selectedIndex = PointToOffset(evnt.X);
+				else {
+					int r = PointToOffset(evnt.X);
+					if (r != -1) {
+						SelectedIndex = r;
+					}
+				}
 			}
 		}
 
-		void PointToOffset (double X)
+		int PointToOffset (double X)
 		{
-			int size = 10.0;
+			int size = (int)BorderSize;
 			for (int i = offset; i< thumbnails.Count ; i++) {
 				ImageSurface thumbnail = thumbnails[i];
 				size += thumbnail.Width;
 				if (X < size)
 					return i;
 			}
+			return -1;
 		}
 
 		
@@ -139,5 +171,16 @@ namespace Pinta.Gui.Widgets
 			//TODO
 			//handle left and right arrow
 		}
+		
+		#region Public Events
+		public event EventHandler Changed;
+		
+		protected virtual void OnChanged ()
+		{
+			if (Changed != null) {
+				Changed (this, EventArgs.Empty);
+			}
+		}
+		#endregion
 	}
 }

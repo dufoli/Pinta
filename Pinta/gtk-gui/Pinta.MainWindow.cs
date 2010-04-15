@@ -37,9 +37,15 @@ namespace Pinta {
         
         private Gtk.MenuBar menubar1;
         
+        private Gtk.HBox hbox4;
+        
+        private Gtk.VBox vbox4;
+        
         private Gtk.Toolbar toolbar1;
         
         private Gtk.Toolbar tooltoolbar;
+        
+        private Pinta.Gui.Widgets.TabStrip tabstrip1;
         
         private Gtk.HBox hbox1;
         
@@ -141,18 +147,25 @@ namespace Pinta {
             w2.Expand = false;
             w2.Fill = false;
             // Container child vbox1.Gtk.Box+BoxChild
+            this.hbox4 = new Gtk.HBox();
+            this.hbox4.Name = "hbox4";
+            this.hbox4.Spacing = 6;
+            // Container child hbox4.Gtk.Box+BoxChild
+            this.vbox4 = new Gtk.VBox();
+            this.vbox4.Name = "vbox4";
+            // Container child vbox4.Gtk.Box+BoxChild
             this.UIManager.AddUiFromString("<ui><toolbar name='toolbar1'/></ui>");
             this.toolbar1 = ((Gtk.Toolbar)(this.UIManager.GetWidget("/toolbar1")));
             this.toolbar1.Name = "toolbar1";
             this.toolbar1.ShowArrow = false;
             this.toolbar1.ToolbarStyle = ((Gtk.ToolbarStyle)(0));
             this.toolbar1.IconSize = ((Gtk.IconSize)(2));
-            this.vbox1.Add(this.toolbar1);
-            Gtk.Box.BoxChild w3 = ((Gtk.Box.BoxChild)(this.vbox1[this.toolbar1]));
-            w3.Position = 1;
+            this.vbox4.Add(this.toolbar1);
+            Gtk.Box.BoxChild w3 = ((Gtk.Box.BoxChild)(this.vbox4[this.toolbar1]));
+            w3.Position = 0;
             w3.Expand = false;
             w3.Fill = false;
-            // Container child vbox1.Gtk.Box+BoxChild
+            // Container child vbox4.Gtk.Box+BoxChild
             this.UIManager.AddUiFromString("<ui><toolbar name='tooltoolbar'/></ui>");
             this.tooltoolbar = ((Gtk.Toolbar)(this.UIManager.GetWidget("/tooltoolbar")));
             this.tooltoolbar.HeightRequest = 28;
@@ -160,11 +173,29 @@ namespace Pinta {
             this.tooltoolbar.ShowArrow = false;
             this.tooltoolbar.ToolbarStyle = ((Gtk.ToolbarStyle)(0));
             this.tooltoolbar.IconSize = ((Gtk.IconSize)(2));
-            this.vbox1.Add(this.tooltoolbar);
-            Gtk.Box.BoxChild w4 = ((Gtk.Box.BoxChild)(this.vbox1[this.tooltoolbar]));
-            w4.Position = 2;
+            this.vbox4.Add(this.tooltoolbar);
+            Gtk.Box.BoxChild w4 = ((Gtk.Box.BoxChild)(this.vbox4[this.tooltoolbar]));
+            w4.Position = 1;
             w4.Expand = false;
             w4.Fill = false;
+            this.hbox4.Add(this.vbox4);
+            Gtk.Box.BoxChild w5 = ((Gtk.Box.BoxChild)(this.hbox4[this.vbox4]));
+            w5.Position = 0;
+            // Container child hbox4.Gtk.Box+BoxChild
+            this.tabstrip1 = new Pinta.Gui.Widgets.TabStrip();
+            this.tabstrip1.Events = ((Gdk.EventMask)(256));
+            this.tabstrip1.Name = "tabstrip1";
+            this.tabstrip1.SelectedIndex = 0;
+            this.hbox4.Add(this.tabstrip1);
+            Gtk.Box.BoxChild w6 = ((Gtk.Box.BoxChild)(this.hbox4[this.tabstrip1]));
+            w6.Position = 1;
+            w6.Expand = false;
+            w6.Fill = false;
+            this.vbox1.Add(this.hbox4);
+            Gtk.Box.BoxChild w7 = ((Gtk.Box.BoxChild)(this.vbox1[this.hbox4]));
+            w7.Position = 1;
+            w7.Expand = false;
+            w7.Fill = false;
             // Container child vbox1.Gtk.Box+BoxChild
             this.hbox1 = new Gtk.HBox();
             this.hbox1.Name = "hbox1";
@@ -179,9 +210,9 @@ namespace Pinta {
             this.colorpalettewidget1 = new Pinta.ColorPaletteWidget();
             this.colorpalettewidget1.Name = "colorpalettewidget1";
             this.vbox3.Add(this.colorpalettewidget1);
-            Gtk.Box.BoxChild w5 = ((Gtk.Box.BoxChild)(this.vbox3[this.colorpalettewidget1]));
-            w5.PackType = ((Gtk.PackType)(1));
-            w5.Position = 0;
+            Gtk.Box.BoxChild w8 = ((Gtk.Box.BoxChild)(this.vbox3[this.colorpalettewidget1]));
+            w8.PackType = ((Gtk.PackType)(1));
+            w8.Position = 0;
             // Container child vbox3.Gtk.Box+BoxChild
             this.hbox3 = new Gtk.HBox();
             this.hbox3.Name = "hbox3";
@@ -194,10 +225,10 @@ namespace Pinta {
             this.toolbox1.ToolbarStyle = ((Gtk.ToolbarStyle)(0));
             this.toolbox1.IconSize = ((Gtk.IconSize)(2));
             this.hbox3.Add(this.toolbox1);
-            Gtk.Box.BoxChild w6 = ((Gtk.Box.BoxChild)(this.hbox3[this.toolbox1]));
-            w6.Position = 0;
-            w6.Expand = false;
-            w6.Fill = false;
+            Gtk.Box.BoxChild w9 = ((Gtk.Box.BoxChild)(this.hbox3[this.toolbox1]));
+            w9.Position = 0;
+            w9.Expand = false;
+            w9.Fill = false;
             // Container child hbox3.Gtk.Box+BoxChild
             this.UIManager.AddUiFromString("<ui><toolbar name='toolbox2'/></ui>");
             this.toolbox2 = ((Gtk.Toolbar)(this.UIManager.GetWidget("/toolbox2")));
@@ -207,39 +238,39 @@ namespace Pinta {
             this.toolbox2.ToolbarStyle = ((Gtk.ToolbarStyle)(0));
             this.toolbox2.IconSize = ((Gtk.IconSize)(2));
             this.hbox3.Add(this.toolbox2);
-            Gtk.Box.BoxChild w7 = ((Gtk.Box.BoxChild)(this.hbox3[this.toolbox2]));
-            w7.Position = 1;
-            w7.Expand = false;
-            w7.Fill = false;
+            Gtk.Box.BoxChild w10 = ((Gtk.Box.BoxChild)(this.hbox3[this.toolbox2]));
+            w10.Position = 1;
+            w10.Expand = false;
+            w10.Fill = false;
             this.vbox3.Add(this.hbox3);
-            Gtk.Box.BoxChild w8 = ((Gtk.Box.BoxChild)(this.vbox3[this.hbox3]));
-            w8.PackType = ((Gtk.PackType)(1));
-            w8.Position = 1;
-            w8.Expand = false;
-            w8.Fill = false;
+            Gtk.Box.BoxChild w11 = ((Gtk.Box.BoxChild)(this.vbox3[this.hbox3]));
+            w11.PackType = ((Gtk.PackType)(1));
+            w11.Position = 1;
+            w11.Expand = false;
+            w11.Fill = false;
             this.hbox2.Add(this.vbox3);
-            Gtk.Box.BoxChild w9 = ((Gtk.Box.BoxChild)(this.hbox2[this.vbox3]));
-            w9.Position = 0;
-            w9.Expand = false;
-            w9.Fill = false;
+            Gtk.Box.BoxChild w12 = ((Gtk.Box.BoxChild)(this.hbox2[this.vbox3]));
+            w12.Position = 0;
+            w12.Expand = false;
+            w12.Fill = false;
             // Container child hbox2.Gtk.Box+BoxChild
             this.GtkScrolledWindow = new Gtk.ScrolledWindow();
             this.GtkScrolledWindow.Name = "GtkScrolledWindow";
             this.GtkScrolledWindow.ShadowType = ((Gtk.ShadowType)(1));
             // Container child GtkScrolledWindow.Gtk.Container+ContainerChild
-            Gtk.Viewport w10 = new Gtk.Viewport();
-            w10.ShadowType = ((Gtk.ShadowType)(0));
+            Gtk.Viewport w13 = new Gtk.Viewport();
+            w13.ShadowType = ((Gtk.ShadowType)(0));
             // Container child GtkViewport.Gtk.Container+ContainerChild
             this.drawingarea1 = new Gtk.DrawingArea();
             this.drawingarea1.CanDefault = true;
             this.drawingarea1.CanFocus = true;
             this.drawingarea1.Events = ((Gdk.EventMask)(16134));
             this.drawingarea1.Name = "drawingarea1";
-            w10.Add(this.drawingarea1);
-            this.GtkScrolledWindow.Add(w10);
+            w13.Add(this.drawingarea1);
+            this.GtkScrolledWindow.Add(w13);
             this.hbox2.Add(this.GtkScrolledWindow);
-            Gtk.Box.BoxChild w13 = ((Gtk.Box.BoxChild)(this.hbox2[this.GtkScrolledWindow]));
-            w13.Position = 1;
+            Gtk.Box.BoxChild w16 = ((Gtk.Box.BoxChild)(this.hbox2[this.GtkScrolledWindow]));
+            w16.Position = 1;
             // Container child hbox2.Gtk.Box+BoxChild
             this.vbox2 = new Gtk.VBox();
             this.vbox2.Name = "vbox2";
@@ -248,18 +279,18 @@ namespace Pinta {
             this.label1.Name = "label1";
             this.label1.LabelProp = Mono.Unix.Catalog.GetString("Layers:");
             this.vbox2.Add(this.label1);
-            Gtk.Box.BoxChild w14 = ((Gtk.Box.BoxChild)(this.vbox2[this.label1]));
-            w14.Position = 0;
-            w14.Expand = false;
-            w14.Fill = false;
+            Gtk.Box.BoxChild w17 = ((Gtk.Box.BoxChild)(this.vbox2[this.label1]));
+            w17.Position = 0;
+            w17.Expand = false;
+            w17.Fill = false;
             // Container child vbox2.Gtk.Box+BoxChild
             this.layerslistwidget1 = new Pinta.LayersListWidget();
             this.layerslistwidget1.Name = "layerslistwidget1";
             this.vbox2.Add(this.layerslistwidget1);
-            Gtk.Box.BoxChild w15 = ((Gtk.Box.BoxChild)(this.vbox2[this.layerslistwidget1]));
-            w15.Position = 1;
-            w15.Expand = false;
-            w15.Fill = false;
+            Gtk.Box.BoxChild w18 = ((Gtk.Box.BoxChild)(this.vbox2[this.layerslistwidget1]));
+            w18.Position = 1;
+            w18.Expand = false;
+            w18.Fill = false;
             // Container child vbox2.Gtk.Box+BoxChild
             this.UIManager.AddUiFromString("<ui><toolbar name='toolbar4'/></ui>");
             this.toolbar4 = ((Gtk.Toolbar)(this.UIManager.GetWidget("/toolbar4")));
@@ -268,10 +299,10 @@ namespace Pinta {
             this.toolbar4.ToolbarStyle = ((Gtk.ToolbarStyle)(0));
             this.toolbar4.IconSize = ((Gtk.IconSize)(1));
             this.vbox2.Add(this.toolbar4);
-            Gtk.Box.BoxChild w16 = ((Gtk.Box.BoxChild)(this.vbox2[this.toolbar4]));
-            w16.Position = 2;
-            w16.Expand = false;
-            w16.Fill = false;
+            Gtk.Box.BoxChild w19 = ((Gtk.Box.BoxChild)(this.vbox2[this.toolbar4]));
+            w19.Position = 2;
+            w19.Expand = false;
+            w19.Fill = false;
             // Container child vbox2.Gtk.Box+BoxChild
             this.GtkScrolledWindow1 = new Gtk.ScrolledWindow();
             this.GtkScrolledWindow1.Name = "GtkScrolledWindow1";
@@ -282,8 +313,8 @@ namespace Pinta {
             this.history_treeview.Name = "history_treeview";
             this.GtkScrolledWindow1.Add(this.history_treeview);
             this.vbox2.Add(this.GtkScrolledWindow1);
-            Gtk.Box.BoxChild w18 = ((Gtk.Box.BoxChild)(this.vbox2[this.GtkScrolledWindow1]));
-            w18.Position = 3;
+            Gtk.Box.BoxChild w21 = ((Gtk.Box.BoxChild)(this.vbox2[this.GtkScrolledWindow1]));
+            w21.Position = 3;
             // Container child vbox2.Gtk.Box+BoxChild
             this.UIManager.AddUiFromString("<ui><toolbar name='toolbar2'/></ui>");
             this.toolbar2 = ((Gtk.Toolbar)(this.UIManager.GetWidget("/toolbar2")));
@@ -292,21 +323,21 @@ namespace Pinta {
             this.toolbar2.ToolbarStyle = ((Gtk.ToolbarStyle)(0));
             this.toolbar2.IconSize = ((Gtk.IconSize)(1));
             this.vbox2.Add(this.toolbar2);
-            Gtk.Box.BoxChild w19 = ((Gtk.Box.BoxChild)(this.vbox2[this.toolbar2]));
-            w19.Position = 4;
-            w19.Expand = false;
-            w19.Fill = false;
+            Gtk.Box.BoxChild w22 = ((Gtk.Box.BoxChild)(this.vbox2[this.toolbar2]));
+            w22.Position = 4;
+            w22.Expand = false;
+            w22.Fill = false;
             this.hbox2.Add(this.vbox2);
-            Gtk.Box.BoxChild w20 = ((Gtk.Box.BoxChild)(this.hbox2[this.vbox2]));
-            w20.Position = 2;
-            w20.Expand = false;
-            w20.Fill = false;
+            Gtk.Box.BoxChild w23 = ((Gtk.Box.BoxChild)(this.hbox2[this.vbox2]));
+            w23.Position = 2;
+            w23.Expand = false;
+            w23.Fill = false;
             this.hbox1.Add(this.hbox2);
-            Gtk.Box.BoxChild w21 = ((Gtk.Box.BoxChild)(this.hbox1[this.hbox2]));
-            w21.Position = 0;
+            Gtk.Box.BoxChild w24 = ((Gtk.Box.BoxChild)(this.hbox1[this.hbox2]));
+            w24.Position = 0;
             this.vbox1.Add(this.hbox1);
-            Gtk.Box.BoxChild w22 = ((Gtk.Box.BoxChild)(this.vbox1[this.hbox1]));
-            w22.Position = 3;
+            Gtk.Box.BoxChild w25 = ((Gtk.Box.BoxChild)(this.vbox1[this.hbox1]));
+            w25.Position = 2;
             // Container child vbox1.Gtk.Box+BoxChild
             this.statusbar1 = new Gtk.Statusbar();
             this.statusbar1.Name = "statusbar1";
@@ -318,24 +349,24 @@ namespace Pinta {
             this.label5.Justify = ((Gtk.Justification)(3));
             this.label5.SingleLineMode = true;
             this.statusbar1.Add(this.label5);
-            Gtk.Box.BoxChild w23 = ((Gtk.Box.BoxChild)(this.statusbar1[this.label5]));
-            w23.Position = 0;
-            w23.Expand = false;
-            w23.Fill = false;
+            Gtk.Box.BoxChild w26 = ((Gtk.Box.BoxChild)(this.statusbar1[this.label5]));
+            w26.Position = 0;
+            w26.Expand = false;
+            w26.Fill = false;
             // Container child statusbar1.Gtk.Box+BoxChild
             this.CursorPositionLabel = new Gtk.Label();
             this.CursorPositionLabel.Name = "CursorPositionLabel";
             this.CursorPositionLabel.LabelProp = Mono.Unix.Catalog.GetString("0, 0");
             this.statusbar1.Add(this.CursorPositionLabel);
-            Gtk.Box.BoxChild w24 = ((Gtk.Box.BoxChild)(this.statusbar1[this.CursorPositionLabel]));
-            w24.Position = 3;
-            w24.Expand = false;
-            w24.Fill = false;
+            Gtk.Box.BoxChild w27 = ((Gtk.Box.BoxChild)(this.statusbar1[this.CursorPositionLabel]));
+            w27.Position = 3;
+            w27.Expand = false;
+            w27.Fill = false;
             this.vbox1.Add(this.statusbar1);
-            Gtk.Box.BoxChild w25 = ((Gtk.Box.BoxChild)(this.vbox1[this.statusbar1]));
-            w25.Position = 4;
-            w25.Expand = false;
-            w25.Fill = false;
+            Gtk.Box.BoxChild w28 = ((Gtk.Box.BoxChild)(this.vbox1[this.statusbar1]));
+            w28.Position = 3;
+            w28.Expand = false;
+            w28.Fill = false;
             this.Add(this.vbox1);
             if ((this.Child != null)) {
                 this.Child.ShowAll();

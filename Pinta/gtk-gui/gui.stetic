@@ -100,31 +100,65 @@
           </packing>
         </child>
         <child>
-          <widget class="Gtk.Toolbar" id="toolbar1">
+          <widget class="Gtk.HBox" id="hbox4">
             <property name="MemberName" />
-            <property name="ShowArrow">False</property>
-            <property name="ButtonStyle">Icons</property>
-            <property name="IconSize">SmallToolbar</property>
-            <node name="toolbar1" type="Toolbar" />
+            <property name="Spacing">6</property>
+            <child>
+              <widget class="Gtk.VBox" id="vbox4">
+                <property name="MemberName" />
+                <child>
+                  <widget class="Gtk.Toolbar" id="toolbar1">
+                    <property name="MemberName" />
+                    <property name="ShowArrow">False</property>
+                    <property name="ButtonStyle">Icons</property>
+                    <property name="IconSize">SmallToolbar</property>
+                    <node name="toolbar1" type="Toolbar" />
+                  </widget>
+                  <packing>
+                    <property name="Position">0</property>
+                    <property name="AutoSize">True</property>
+                    <property name="Expand">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Toolbar" id="tooltoolbar">
+                    <property name="MemberName" />
+                    <property name="HeightRequest">28</property>
+                    <property name="ShowArrow">False</property>
+                    <property name="ButtonStyle">Icons</property>
+                    <property name="IconSize">SmallToolbar</property>
+                    <node name="tooltoolbar" type="Toolbar" />
+                  </widget>
+                  <packing>
+                    <property name="Position">1</property>
+                    <property name="AutoSize">True</property>
+                    <property name="Expand">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="Position">0</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Pinta.Gui.Widgets.TabStrip" id="tabstrip1">
+                <property name="MemberName" />
+                <property name="Events">ButtonPressMask</property>
+                <property name="SelectedIndex">0</property>
+              </widget>
+              <packing>
+                <property name="Position">1</property>
+                <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
+              </packing>
+            </child>
           </widget>
           <packing>
             <property name="Position">1</property>
-            <property name="AutoSize">True</property>
-            <property name="Expand">False</property>
-            <property name="Fill">False</property>
-          </packing>
-        </child>
-        <child>
-          <widget class="Gtk.Toolbar" id="tooltoolbar">
-            <property name="MemberName" />
-            <property name="HeightRequest">28</property>
-            <property name="ShowArrow">False</property>
-            <property name="ButtonStyle">Icons</property>
-            <property name="IconSize">SmallToolbar</property>
-            <node name="tooltoolbar" type="Toolbar" />
-          </widget>
-          <packing>
-            <property name="Position">2</property>
             <property name="AutoSize">True</property>
             <property name="Expand">False</property>
             <property name="Fill">False</property>
@@ -323,7 +357,7 @@
             </child>
           </widget>
           <packing>
-            <property name="Position">3</property>
+            <property name="Position">2</property>
             <property name="AutoSize">True</property>
           </packing>
         </child>
@@ -362,7 +396,7 @@
             </child>
           </widget>
           <packing>
-            <property name="Position">4</property>
+            <property name="Position">3</property>
             <property name="AutoSize">False</property>
             <property name="Expand">False</property>
             <property name="Fill">False</property>
@@ -1895,6 +1929,8 @@
                 <property name="DefaultValue">16</property>
                 <property name="MaximumValue">64</property>
                 <property name="MinimumValue">2</property>
+                <property name="DigitsValue">0</property>
+                <property name="IncrementValue">0</property>
                 <property name="Value">0</property>
               </widget>
               <packing>
@@ -1912,6 +1948,8 @@
                 <property name="DefaultValue">16</property>
                 <property name="MaximumValue">64</property>
                 <property name="MinimumValue">2</property>
+                <property name="DigitsValue">0</property>
+                <property name="IncrementValue">0</property>
                 <property name="Value">0</property>
               </widget>
               <packing>
@@ -1929,6 +1967,8 @@
                 <property name="DefaultValue">16</property>
                 <property name="MaximumValue">64</property>
                 <property name="MinimumValue">2</property>
+                <property name="DigitsValue">0</property>
+                <property name="IncrementValue">0</property>
                 <property name="Value">0</property>
               </widget>
               <packing>
