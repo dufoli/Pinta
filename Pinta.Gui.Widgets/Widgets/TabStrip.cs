@@ -69,6 +69,13 @@ namespace Pinta.Gui.Widgets
 			//FOR testing add a static list of image.
 		}
 		
+		public void AddThumbnail (ImageSurface surf)
+		{
+			//TODO reduce flatImage to thumbnail
+			thumbnails.Add (surf);
+			//TODO selected and move offset if needed
+		}
+		
 		protected override bool OnExposeEvent (Gdk.EventExpose ev)
 		{
 			base.OnExposeEvent (ev);
@@ -124,7 +131,11 @@ namespace Pinta.Gui.Widgets
 					g.LineTo (pos + thumbnail.Width, rectHeight -2);
 					g.LineTo (pos, rectHeight -2);
 					g.Color = new Color (0,0,0);
-					g.Stroke ();
+					g.StrokePreserve ();
+					
+					//TODO add clip region
+					//http://cairographics.org/FAQ/
+					//g.Rectangle (
 					
 					g.SetSource (thumbnail, 0.0, 0.0);
 					g.Paint ();
@@ -132,6 +143,12 @@ namespace Pinta.Gui.Widgets
 				}
 			}
 			return true;
+		}
+		
+		protected override void OnSizeRequested (ref Gtk.Requisition requisition)
+		{
+			requisition.Height = 65;
+			requisition.Width = 400;
 		}
 		
 		protected override bool OnButtonPressEvent (Gdk.EventButton evnt)
