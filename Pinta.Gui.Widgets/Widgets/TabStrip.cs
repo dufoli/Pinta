@@ -26,6 +26,7 @@
 
 using System;
 using Cairo;
+using Pinta.Core;
 using System.Collections.Generic;
 
 namespace Pinta.Gui.Widgets
@@ -33,7 +34,8 @@ namespace Pinta.Gui.Widgets
 	[System.ComponentModel.ToolboxItem(true)]
 	public partial class TabStrip : Gtk.DrawingArea
 	{
-		private const double BorderSize = 10.0;
+		private const int SideSize = 10;
+		private const int BorderSize = 8;
 		private List<ImageSurface> thumbnails;
 		int offset;
 		int selectedIndex;
@@ -66,6 +68,14 @@ namespace Pinta.Gui.Widgets
 			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
 			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
 			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			
 			//FOR testing add a static list of image.
 		}
 		
@@ -87,6 +97,7 @@ namespace Pinta.Gui.Widgets
 			
 			using (Cairo.Context g = Gdk.CairoHelper.Create (GdkWindow)) {
 				if (offset > 0) {
+					//triangle
 					g.MoveTo (1, -30);
 					g.LineTo (6, -25);
 					g.LineTo (6, -35);
@@ -97,12 +108,12 @@ namespace Pinta.Gui.Widgets
 					//todo draw image gradient of thumbnails[offset -1]
 				}
 				
-				double pos = BorderSize;
+				double pos = SideSize;
 				for (int i = offset; i< thumbnails.Count ; i++) {
 					ImageSurface thumbnail = thumbnails[i];
 					
-					if (BorderSize + thumbnail.Width  > rectWidth - BorderSize) {
-						//rectangle
+					if (SideSize + thumbnail.Width  > rectWidth - SideSize) {
+						//triangle
 						g.MoveTo (rectWidth -1, -30);
 						g.LineTo (rectWidth -6, -25);
 						g.LineTo (rectWidth -6, -35);
@@ -115,31 +126,32 @@ namespace Pinta.Gui.Widgets
 					}
 					
 					if (i == selectedIndex) {
-						g.MoveTo (pos - 2.0, 0.0);
-						g.LineTo (pos - 2.0, rectHeight);
-						g.LineTo (pos + 2.0 + thumbnail.Width, rectHeight);
-						g.LineTo (pos + 2.0 + thumbnail.Width, 0.0);
-						g.LineTo (pos - 2.0, 0.0);
-						g.Color = new Color (0, 0.10, 0.75, 0.75);
+						g.MoveTo (pos - BorderSize/2, 0.0);
+						g.LineTo (pos - BorderSize/2, rectHeight);
+						g.LineTo (pos + BorderSize/2 + thumbnail.Width, rectHeight);
+						g.LineTo (pos + BorderSize/2 + thumbnail.Width, 0.0);
+						g.LineTo (pos - BorderSize/2, 0.0);
+						g.Color = new Color (0, 0.10, 0.75, 0.45);
 						g.FillPreserve ();
 						//TODO Stroke
 					}
 					
-					g.MoveTo (pos, rectHeight -2);
-					g.LineTo (pos, rectHeight -2 - thumbnail.Height);
-					g.LineTo (pos + thumbnail.Width, rectHeight -2 - thumbnail.Height);
-					g.LineTo (pos + thumbnail.Width, rectHeight -2);
-					g.LineTo (pos, rectHeight -2);
+					g.MoveTo (pos, rectHeight - BorderSize/2);
+					g.LineTo (pos, rectHeight - BorderSize/2 - thumbnail.Height);
+					g.LineTo (pos + thumbnail.Width, rectHeight - BorderSize/2 - thumbnail.Height);
+					g.LineTo (pos + thumbnail.Width, rectHeight - BorderSize/2);
+					g.LineTo (pos, rectHeight - BorderSize/2);
 					g.Color = new Color (0,0,0);
-					g.StrokePreserve ();
+					g.Stroke ();
 					
 					//TODO add clip region
 					//http://cairographics.org/FAQ/
-					//g.Rectangle (
+
+					g.SetSourceSurface (thumbnail, (int)pos, rectHeight - BorderSize/2 - thumbnail.Height);
+					g.Rectangle (pos, rectHeight - BorderSize/2 - thumbnail.Height, thumbnail.Width, thumbnail.Height);
+					g.Fill ();
 					
-					g.SetSource (thumbnail, 0.0, 0.0);
-					g.Paint ();
-					pos += thumbnail.Width + 4;
+					pos += thumbnail.Width + BorderSize;
 				}
 			}
 			return true;
@@ -153,27 +165,28 @@ namespace Pinta.Gui.Widgets
 		
 		protected override bool OnButtonPressEvent (Gdk.EventButton evnt)
 		{
-			return base.OnButtonPressEvent (evnt);
 			if (evnt.Button == 1) { //left
-				if (evnt.X < BorderSize)
+				if (evnt.X < SideSize) //todo test is triangle is active and clamp offset
 					offset--;
-				else if (evnt.X > this.Allocation.Width - BorderSize)
+				else if (evnt.X > this.Allocation.Width - SideSize)//todo test is triangle is active
 					offset++;
 				else {
 					int r = PointToOffset(evnt.X);
 					if (r != -1) {
 						SelectedIndex = r;
+						this.GdkWindow.Invalidate ();
 					}
 				}
 			}
+			return base.OnButtonPressEvent (evnt);
 		}
 
 		int PointToOffset (double X)
 		{
-			int size = (int)BorderSize;
+			int size = SideSize - BorderSize/2;
 			for (int i = offset; i< thumbnails.Count ; i++) {
 				ImageSurface thumbnail = thumbnails[i];
-				size += thumbnail.Width;
+				size += thumbnail.Width + BorderSize;
 				if (X < size)
 					return i;
 			}
