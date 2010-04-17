@@ -39,6 +39,8 @@ namespace Pinta.Gui.Widgets
 		private List<ImageSurface> thumbnails;
 		int offset;
 		int selectedIndex;
+		bool leftTriangle;
+		bool rightTriangle;
 		
 		public int SelectedIndex {
 			get {
@@ -47,11 +49,24 @@ namespace Pinta.Gui.Widgets
 			set {
 				if (selectedIndex != value) {
 					selectedIndex = value;
+					this.GdkWindow.Invalidate ();
 					OnChanged ();
 				}
 			}
 		}
-		
+
+		public int Offset {
+			get {
+				return offset;
+			}
+			set {
+				if (offset != value && value >= 0 && value < thumbnails.Count) {
+					offset = value;
+					this.GdkWindow.Invalidate ();
+				}
+			}
+		}
+
 		public TabStrip ()
 		{
 			Events = ((Gdk.EventMask)(16134));
@@ -65,6 +80,8 @@ namespace Pinta.Gui.Widgets
 			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
 			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
 			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
+			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Effects.Artistic.OilPainting.png"));
 			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
 			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
 			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
@@ -93,33 +110,42 @@ namespace Pinta.Gui.Widgets
 			int rectWidth;
 			int rectHeight;
 			
+			rightTriangle = false;
 			GdkWindow.GetSize (out rectWidth, out rectHeight);
 			
 			using (Cairo.Context g = Gdk.CairoHelper.Create (GdkWindow)) {
 				if (offset > 0) {
-					//triangle
+					leftTriangle = true;
 					g.MoveTo (1, -30);
 					g.LineTo (6, -25);
 					g.LineTo (6, -35);
 					g.LineTo (1, -30);
 					g.ClosePath ();
-					g.Color = new Color (0,0,0);
+					g.LineWidth = 1;
+					g.LineCap = LineCap.Square;
+					g.Color = new Color (0, 0, 0);
+					g.StrokePreserve ();
 					g.Fill();
 					//todo draw image gradient of thumbnails[offset -1]
 				}
+				else
+					leftTriangle = false;
 				
 				double pos = SideSize;
 				for (int i = offset; i< thumbnails.Count ; i++) {
 					ImageSurface thumbnail = thumbnails[i];
 					
-					if (SideSize + thumbnail.Width  > rectWidth - SideSize) {
-						//triangle
+					if (pos + thumbnail.Width  > rectWidth - SideSize) {
+						rightTriangle = true;
 						g.MoveTo (rectWidth -1, -30);
 						g.LineTo (rectWidth -6, -25);
 						g.LineTo (rectWidth -6, -35);
 						g.LineTo (rectWidth -1, -30);
 						g.ClosePath ();
-						g.Color = new Color (0,0,0);
+						g.LineWidth = 1;
+						g.LineCap = LineCap.Square;
+						g.Color = new Color (0, 0, 0);
+						g.StrokePreserve ();
 						g.Fill();
 						//TODO draw gradient thumbnail
 						break;
@@ -131,8 +157,8 @@ namespace Pinta.Gui.Widgets
 						g.LineTo (pos + BorderSize/2 + thumbnail.Width, rectHeight);
 						g.LineTo (pos + BorderSize/2 + thumbnail.Width, 0.0);
 						g.LineTo (pos - BorderSize/2, 0.0);
-						g.Color = new Color (0, 0.10, 0.75, 0.45);
-						g.FillPreserve ();
+						g.Color = new Color (0, 0.10, 0.85, 0.35);
+						g.Fill ();
 						//TODO Stroke
 					}
 					
@@ -144,9 +170,6 @@ namespace Pinta.Gui.Widgets
 					g.Color = new Color (0,0,0);
 					g.Stroke ();
 					
-					//TODO add clip region
-					//http://cairographics.org/FAQ/
-
 					g.SetSourceSurface (thumbnail, (int)pos, rectHeight - BorderSize/2 - thumbnail.Height);
 					g.Rectangle (pos, rectHeight - BorderSize/2 - thumbnail.Height, thumbnail.Width, thumbnail.Height);
 					g.Fill ();
@@ -166,15 +189,14 @@ namespace Pinta.Gui.Widgets
 		protected override bool OnButtonPressEvent (Gdk.EventButton evnt)
 		{
 			if (evnt.Button == 1) { //left
-				if (evnt.X < SideSize) //todo test is triangle is active and clamp offset
-					offset--;
-				else if (evnt.X > this.Allocation.Width - SideSize)//todo test is triangle is active
-					offset++;
+				if (evnt.X < SideSize && leftTriangle) //todo test is triangle is active and clamp offset
+					Offset--;
+				else if (evnt.X > this.Allocation.Width - SideSize && rightTriangle)//todo test is triangle is active
+					Offset++;
 				else {
 					int r = PointToOffset(evnt.X);
 					if (r != -1) {
 						SelectedIndex = r;
-						this.GdkWindow.Invalidate ();
 					}
 				}
 			}
@@ -200,6 +222,7 @@ namespace Pinta.Gui.Widgets
 			
 			//TODO
 			//handle left and right arrow
+			//handle supr to delete current
 		}
 		
 		#region Public Events

@@ -186,6 +186,7 @@ namespace Pinta {
             this.tabstrip1.Events = ((Gdk.EventMask)(256));
             this.tabstrip1.Name = "tabstrip1";
             this.tabstrip1.SelectedIndex = 0;
+            this.tabstrip1.Offset = 0;
             this.hbox4.Add(this.tabstrip1);
             Gtk.Box.BoxChild w6 = ((Gtk.Box.BoxChild)(this.hbox4[this.tabstrip1]));
             w6.Position = 1;
