@@ -115,48 +115,48 @@ namespace Pinta.Gui.Widgets
 			
 			using (Cairo.Context g = Gdk.CairoHelper.Create (GdkWindow)) {
 				if (offset > 0) {
-					leftTriangle = true;
-					g.MoveTo (1, -30);
-					g.LineTo (6, -25);
-					g.LineTo (6, -35);
-					g.LineTo (1, -30);
+					rightTriangle = true;
+					g.MoveTo (rectWidth -1, rectHeight/2);
+					g.LineTo (rectWidth -6, rectHeight/2 + 5);
+					g.LineTo (rectWidth -6, rectHeight/2 - 5);
+					g.LineTo (rectWidth -1, rectHeight/2);
 					g.ClosePath ();
 					g.LineWidth = 1;
 					g.LineCap = LineCap.Square;
 					g.Color = new Color (0, 0, 0);
 					g.StrokePreserve ();
 					g.Fill();
-					//todo draw image gradient of thumbnails[offset -1]
+					//TODO draw gradient thumbnail
 				}
 				else
 					leftTriangle = false;
 				
-				double pos = SideSize;
+				double pos = rectWidth - SideSize;
 				for (int i = offset; i< thumbnails.Count ; i++) {
 					ImageSurface thumbnail = thumbnails[i];
 					
-					if (pos + thumbnail.Width  > rectWidth - SideSize) {
-						rightTriangle = true;
-						g.MoveTo (rectWidth -1, -30);
-						g.LineTo (rectWidth -6, -25);
-						g.LineTo (rectWidth -6, -35);
-						g.LineTo (rectWidth -1, -30);
+					if (pos - thumbnail.Width - SideSize < 0) {
+						leftTriangle = true;
+						g.MoveTo (1, rectHeight/2);
+						g.LineTo (6, rectHeight/2 + 5);
+						g.LineTo (6, rectHeight/2 - 5);
+						g.LineTo (1, rectHeight/2);
 						g.ClosePath ();
 						g.LineWidth = 1;
 						g.LineCap = LineCap.Square;
 						g.Color = new Color (0, 0, 0);
 						g.StrokePreserve ();
 						g.Fill();
-						//TODO draw gradient thumbnail
+						//todo draw image gradient of thumbnails[offset -1]
 						break;
 					}
 					
 					if (i == selectedIndex) {
-						g.MoveTo (pos - BorderSize/2, 0.0);
-						g.LineTo (pos - BorderSize/2, rectHeight);
-						g.LineTo (pos + BorderSize/2 + thumbnail.Width, rectHeight);
-						g.LineTo (pos + BorderSize/2 + thumbnail.Width, 0.0);
-						g.LineTo (pos - BorderSize/2, 0.0);
+						g.MoveTo (pos + BorderSize/2, 0.0);
+						g.LineTo (pos + BorderSize/2, rectHeight);
+						g.LineTo (pos - BorderSize/2 - thumbnail.Width, rectHeight);
+						g.LineTo (pos - BorderSize/2 - thumbnail.Width, 0.0);
+						g.LineTo (pos + BorderSize/2, 0.0);
 						g.Color = new Color (0, 0.10, 0.85, 0.35);
 						g.Fill ();
 						//TODO Stroke
@@ -164,17 +164,17 @@ namespace Pinta.Gui.Widgets
 					
 					g.MoveTo (pos, rectHeight - BorderSize/2);
 					g.LineTo (pos, rectHeight - BorderSize/2 - thumbnail.Height);
-					g.LineTo (pos + thumbnail.Width, rectHeight - BorderSize/2 - thumbnail.Height);
-					g.LineTo (pos + thumbnail.Width, rectHeight - BorderSize/2);
+					g.LineTo (pos - thumbnail.Width, rectHeight - BorderSize/2 - thumbnail.Height);
+					g.LineTo (pos - thumbnail.Width, rectHeight - BorderSize/2);
 					g.LineTo (pos, rectHeight - BorderSize/2);
 					g.Color = new Color (0,0,0);
 					g.Stroke ();
 					
-					g.SetSourceSurface (thumbnail, (int)pos, rectHeight - BorderSize/2 - thumbnail.Height);
-					g.Rectangle (pos, rectHeight - BorderSize/2 - thumbnail.Height, thumbnail.Width, thumbnail.Height);
+					g.SetSourceSurface (thumbnail, (int)pos - thumbnail.Width, rectHeight - BorderSize/2 - thumbnail.Height);
+					g.Rectangle (pos - thumbnail.Width, rectHeight - BorderSize/2 - thumbnail.Height, thumbnail.Width, thumbnail.Height);
 					g.Fill ();
 					
-					pos += thumbnail.Width + BorderSize;
+					pos -= thumbnail.Width + BorderSize;
 				}
 			}
 			return true;
@@ -190,9 +190,9 @@ namespace Pinta.Gui.Widgets
 		{
 			if (evnt.Button == 1) { //left
 				if (evnt.X < SideSize && leftTriangle) //todo test is triangle is active and clamp offset
-					Offset--;
-				else if (evnt.X > this.Allocation.Width - SideSize && rightTriangle)//todo test is triangle is active
 					Offset++;
+				else if (evnt.X > this.Allocation.Width - SideSize && rightTriangle)//todo test is triangle is active
+					Offset--;
 				else {
 					int r = PointToOffset(evnt.X);
 					if (r != -1) {
@@ -205,11 +205,15 @@ namespace Pinta.Gui.Widgets
 
 		int PointToOffset (double X)
 		{
-			int size = SideSize - BorderSize/2;
+			int rectWidth;
+			int rectHeight;
+			GdkWindow.GetSize (out rectWidth, out rectHeight);
+			
+			int size = rectWidth - SideSize + BorderSize/2;
 			for (int i = offset; i< thumbnails.Count ; i++) {
 				ImageSurface thumbnail = thumbnails[i];
-				size += thumbnail.Width + BorderSize;
-				if (X < size)
+				size -= thumbnail.Width + BorderSize;
+				if (X > size)
 					return i;
 			}
 			return -1;
