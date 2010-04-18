@@ -31,23 +31,10 @@ namespace Pinta.Core
 	// This is just to get them to show up in the toolbox
 	// until they get implemented
 			
-	public class GradientTool : BaseTool
-	{
-		public override string Name {
-			get { return "Gradient"; }
-		}
-		public override string Icon {
-			get { return "Tools.Gradient.png"; }
-		}
-		public override bool Enabled {
-			get { return false; }
-		}
-	}
-	
 	public class CloneStampTool : BaseTool
 	{
 		public override string Name {
-			get { return "Clone stamp"; }
+			get { return "Clone Stamp"; }
 		}
 		public override string Icon {
 			get { return "Tools.CloneStamp.png"; }
@@ -56,4 +43,5 @@ namespace Pinta.Core
 			get { return false; }
 		}
 	}
+			
 }

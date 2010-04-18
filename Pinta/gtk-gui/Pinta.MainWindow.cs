@@ -63,6 +63,8 @@ namespace Pinta {
         
         private Gtk.ScrolledWindow GtkScrolledWindow;
         
+        private Gtk.Table table1;
+        
         private Gtk.DrawingArea drawingarea1;
         
         private Gtk.VBox vbox2;

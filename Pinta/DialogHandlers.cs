@@ -80,7 +80,11 @@ namespace Pinta
             PintaCore.Actions.Effects.Median.Activated += HandleEffectMedianActivated;
             PintaCore.Actions.Effects.ReduceNoise.Activated += HandleEffectReduceNoiseActivated;
 			PintaCore.Actions.Effects.Outline.Activated += HandleEffectOutlineActivated;
-
+			PintaCore.Actions.View.Rulers.Toggled += HandlePintaCoreActionsViewRulersToggled;
+			PintaCore.Actions.View.Pixels.Activated += HandlePixelsActivated;
+			PintaCore.Actions.View.Inches.Activated += HandleInchesActivated;
+			PintaCore.Actions.View.Centimeters.Activated += HandleCentimetersActivated;
+			PintaCore.Actions.View.UnitComboBox.ComboBox.Changed += HandleUnitComboBoxComboBoxChanged;
 		}
 
 		#region Handlers
@@ -129,6 +133,7 @@ namespace Pinta
 			int response = dialog.Run ();
 
 			if (response == (int)Gtk.ResponseType.Ok) {
+				PintaCore.Workspace.ActiveDocument.HasFile = false;
 				PintaCore.Workspace.ImageSize = new Cairo.Point (dialog.NewImageWidth, dialog.NewImageHeight);
 				PintaCore.Workspace.CanvasSize = new Cairo.Point (dialog.NewImageWidth, dialog.NewImageHeight);
 				
@@ -225,6 +230,7 @@ namespace Pinta
 			LayerProperties initial,
 			LayerProperties updated)
 		{
+
 			string ret = null;
 			int count = 0;
 			
@@ -320,6 +326,46 @@ namespace Pinta
         {
             PintaCore.Actions.Adjustments.PerformEffect(new OutlineEffect());
         }
+
+		private void HandlePintaCoreActionsViewRulersToggled (object sender, EventArgs e)
+		{
+			if (((ToggleAction)sender).Active)
+				main_window.ShowRulers ();
+			else
+				main_window.HideRulers ();
+		}
+
+		private void HandleUnitComboBoxComboBoxChanged (object sender, EventArgs e)
+		{
+			switch (PintaCore.Actions.View.UnitComboBox.ComboBox.Active) {
+				case 0://pixels
+					main_window.ChangeRulersUnit (Gtk.MetricType.Pixels);
+				break;
+				case 1://inches
+					main_window.ChangeRulersUnit (Gtk.MetricType.Inches);
+				break;
+				case 2://centimeters
+					main_window.ChangeRulersUnit (Gtk.MetricType.Centimeters);
+				break;
+				
+			}
+		}
+
+		private void HandleCentimetersActivated (object sender, EventArgs e)
+		{
+			main_window.ChangeRulersUnit (Gtk.MetricType.Centimeters);
+		}
+
+		private void HandleInchesActivated (object sender, EventArgs e)
+		{
+			main_window.ChangeRulersUnit (Gtk.MetricType.Inches);
+		}
+
+		private void HandlePixelsActivated (object sender, EventArgs e)
+		{
+			main_window.ChangeRulersUnit (Gtk.MetricType.Pixels);
+		}
+
 		#endregion
 	}
 }
