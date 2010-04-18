@@ -148,6 +148,7 @@
                 <property name="MemberName" />
                 <property name="Events">ButtonPressMask</property>
                 <property name="SelectedIndex">0</property>
+                <property name="Offset">0</property>
               </widget>
               <packing>
                 <property name="Position">1</property>

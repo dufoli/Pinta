@@ -74,32 +74,36 @@ namespace Pinta.Gui.Widgets
 			thumbnails = new List<ImageSurface> ();
 			offset = 0;
 			selectedIndex = 0;
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Effects.Artistic.OilPainting.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			thumbnails.Add (new ImageSurface ("/home/dufoli/src/Pinta/Pinta.Resources/Resources/Menu.Adjustments.Posterize.png"));
-			
-			//FOR testing add a static list of image.
 		}
 		
 		public void AddThumbnail (ImageSurface surf)
 		{
-			//TODO reduce flatImage to thumbnail
-			thumbnails.Add (surf);
+			int rectWidth;
+			int rectHeight;
+			double scale = 1.0;
+			
+			GdkWindow.GetSize (out rectWidth, out rectHeight);
+			
+			if(surf.Width > surf.Height) {
+				if (surf.Width > rectHeight - BorderSize) {
+					scale = (double)(rectHeight - BorderSize) / surf.Width;
+				}
+			} 
+			else
+			{
+				if (surf.Height > rectHeight - BorderSize) {
+					scale = (double)(rectHeight - BorderSize) / surf.Height;
+				}	
+			}
+			
+			ImageSurface thumbnail = new ImageSurface (Format.Argb32, (int)(surf.Width * scale), (int)(surf.Height * scale));
+			using (Cairo.Context g = new Cairo.Context (thumbnail)) {
+				if (scale != 1.0)
+					g.Scale (scale, scale);
+				g.SetSourceSurface (surf, 0, 0);
+				g.Paint ();
+			}
+			thumbnails.Add (thumbnail);
 			//TODO selected and move offset if needed
 		}
 		
@@ -109,8 +113,6 @@ namespace Pinta.Gui.Widgets
 			
 			int rectWidth;
 			int rectHeight;
-			
-			rightTriangle = false;
 			GdkWindow.GetSize (out rectWidth, out rectHeight);
 			
 			using (Cairo.Context g = Gdk.CairoHelper.Create (GdkWindow)) {
@@ -129,9 +131,10 @@ namespace Pinta.Gui.Widgets
 					//TODO draw gradient thumbnail
 				}
 				else
-					leftTriangle = false;
+					rightTriangle = false;
 				
 				double pos = rectWidth - SideSize;
+				leftTriangle = false;
 				for (int i = offset; i< thumbnails.Count ; i++) {
 					ImageSurface thumbnail = thumbnails[i];
 					
