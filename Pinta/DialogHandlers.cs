@@ -157,6 +157,7 @@ namespace Pinta
 				PintaCore.History.PushNewItem (new BaseHistoryItem ("gtk-new", "New Image"));
 				PintaCore.Workspace.IsDirty = false;
 				PintaCore.Actions.View.ZoomToWindow.Activate ();
+				main_window.AddDocument (PintaCore.Layers.GetFlattenedImage ());
 			}
 
 			dialog.Destroy ();
@@ -267,6 +268,7 @@ namespace Pinta
 				md.Destroy ();
 
 				if (response == ResponseType.Ok) {
+					main_window.CloseFile ();
 					//TODO remove from tabgrid and switch file on workspace mgr
 				}
 		}

@@ -42,6 +42,8 @@ namespace Pinta.Gui.Widgets
 		bool leftTriangle;
 		bool rightTriangle;
 		
+		public int Count { get{return thumbnails.Count;} }
+		
 		public int SelectedIndex {
 			get {
 				return selectedIndex;
@@ -257,5 +259,13 @@ namespace Pinta.Gui.Widgets
 			}
 		}
 		#endregion
+
+		public void RemoveCurrentThumbnail ()
+		{
+			thumbnails.Remove (thumbnails[selectedIndex]);
+			
+			if (SelectedIndex >= thumbnails.Count)
+				SelectedIndex--;
+		}
 	}
 }

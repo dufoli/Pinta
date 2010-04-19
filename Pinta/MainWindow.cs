@@ -136,6 +136,8 @@ namespace Pinta
 			
 			gr = new GridRenderer (cr);
 			
+			tabstrip1.Changed += HandleTabstrip1Changed;
+			
 			if (Platform.GetOS () == Platform.OS.Mac) {
 				try {
 					//enable the global key handler for keyboard shortcuts
@@ -157,6 +159,13 @@ namespace Pinta
 					// If things don't work out, just use a normal menu.
 				}
 			}
+		}
+
+		void HandleTabstrip1Changed (object sender, EventArgs e)
+		{
+			//if active doc 
+			// save it for restor later
+			//restore the selected one.
 		}
 
 		private void MainWindow_DeleteEvent (object o, DeleteEventArgs args)
@@ -578,6 +587,8 @@ namespace Pinta
 
 				bg.Dispose ();
 
+				AddDocument (PintaCore.Layers.GetFlattenedImage ());
+				
 				PintaCore.Workspace.DocumentPath = System.IO.Path.GetFullPath (file);
 				PintaCore.History.PushNewItem (new BaseHistoryItem ("gtk-open", "Open Image"));
 				PintaCore.Workspace.IsDirty = false;
@@ -594,6 +605,21 @@ namespace Pinta
 			}
 			
 			return fileOpened;
+		}
+
+		public void CloseFile ()
+		{
+			if (tabstrip1.Count == 1) {
+				PintaCore.Actions.File.Exit.Activate (); 
+				return;
+			}
+
+			tabstrip1.RemoveCurrentThumbnail ();
+		}
+		
+		public void AddDocument (Cairo.ImageSurface surf)
+		{
+			tabstrip1.AddThumbnail (surf);
 		}
 	}
 }
