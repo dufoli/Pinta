@@ -71,9 +71,9 @@ namespace Pinta
 					}
 				
 					if (arg != null && arg != "")
-						Pinta.Core.PintaCore.Actions.File.OpenFile (arg);
+						win.OpenFile (arg);
 				} else {
-					Pinta.Core.PintaCore.Actions.File.OpenFile (extra[0]);
+					win.OpenFile (extra[0]);
 				}				
 			}
 			

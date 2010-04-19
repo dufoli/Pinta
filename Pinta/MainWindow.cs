@@ -546,5 +546,54 @@ namespace Pinta
 			vruler.SetRange (-p.Y, PintaCore.Workspace.ImageSize.Y + p.Y, 0, PintaCore.Workspace.ImageSize.Y + p.Y);
 		}
 		#endregion
+		
+		public bool OpenFile (string file)
+		{
+			bool fileOpened = false;
+			//TODO selector to say if we load it in new layer or in new image.
+			//move that code to workspace mgr and save history,layer and workspace manager
+			//for previous active document before load this new one.
+			//this will be needed for restoring word later if we switch between file.
+			//for design cut workspace manager in 2 : documents mgr and workspace mgr.
+			// documents manager will manage tab grid and MDI 
+			try {
+				// Open the image and add it to the layers
+				Pixbuf bg = new Pixbuf (file);
+
+				PintaCore.Layers.Clear ();
+				PintaCore.History.Clear ();
+				PintaCore.Layers.DestroySelectionLayer ();
+
+				PintaCore.Workspace.ImageSize = new Cairo.Point (bg.Width, bg.Height);
+				PintaCore.Workspace.CanvasSize = new Cairo.Point (bg.Width, bg.Height);
+
+				PintaCore.Layers.ResetSelectionPath ();
+
+				Layer layer = PintaCore.Layers.AddNewLayer (System.IO.Path.GetFileName (file));
+
+				using (Cairo.Context g = new Cairo.Context (layer.Surface)) {
+					CairoHelper.SetSourcePixbuf (g, bg, 0, 0);
+					g.Paint ();
+				}
+
+				bg.Dispose ();
+
+				PintaCore.Workspace.DocumentPath = System.IO.Path.GetFullPath (file);
+				PintaCore.History.PushNewItem (new BaseHistoryItem ("gtk-open", "Open Image"));
+				PintaCore.Workspace.IsDirty = false;
+				PintaCore.Actions.View.ZoomToWindow.Activate ();
+				PintaCore.Workspace.Invalidate ();
+				
+				fileOpened = true;
+			} catch {
+				MessageDialog md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal, MessageType.Error, ButtonsType.Ok, "Could not open file: {0}", file);
+				md.Title = "Error";
+				
+				md.Run ();
+				md.Destroy ();
+			}
+			
+			return fileOpened;
+		}
 	}
 }

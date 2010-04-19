@@ -36,7 +36,7 @@ namespace Pinta.Core
 	{
 		public Gtk.Action New { get; private set; }
 		public Gtk.Action Open { get; private set; }
-		public Gtk.Action OpenRecent { get; private set; }
+		public Gtk.RecentAction OpenRecent { get; private set; }
 		public Gtk.Action Close { get; private set; }
 		public Gtk.Action Save { get; private set; }
 		public Gtk.Action SaveAs { get; private set; }
@@ -55,7 +55,7 @@ namespace Pinta.Core
 			RecentFilter recentFilter = new RecentFilter ();
 			recentFilter.AddApplication ("Pinta");
 			
-			(OpenRecent as RecentAction).AddFilter (recentFilter);
+			OpenRecent.AddFilter (recentFilter);
 			
 			recentData = new RecentData ();
 			recentData.AppName = "Pinta";
@@ -68,8 +68,6 @@ namespace Pinta.Core
 			Print = new Gtk.Action ("Print", Mono.Unix.Catalog.GetString ("Print"), null, "gtk-print");
 			Exit = new Gtk.Action ("Exit", Mono.Unix.Catalog.GetString ("Quit"), null, "gtk-quit");
 
-//			OpenRecent.Sensitive = false;
-			Close.Sensitive = false;
 			Print.Sensitive = false;
 		}
 
@@ -81,7 +79,7 @@ namespace Pinta.Core
 			menu.Append (New.CreateAcceleratedMenuItem (Gdk.Key.N, Gdk.ModifierType.ControlMask));
 			menu.Append (Open.CreateAcceleratedMenuItem (Gdk.Key.O, Gdk.ModifierType.ControlMask));
 			menu.Append (OpenRecent.CreateMenuItem ());
-			//menu.Append (Close.CreateAcceleratedMenuItem (Gdk.Key.W, Gdk.ModifierType.ControlMask));
+			menu.Append (Close.CreateAcceleratedMenuItem (Gdk.Key.W, Gdk.ModifierType.ControlMask));
 			menu.AppendSeparator ();
 			menu.Append (Save.CreateAcceleratedMenuItem (Gdk.Key.S, Gdk.ModifierType.ControlMask));
 			menu.Append (SaveAs.CreateAcceleratedMenuItem (Gdk.Key.S, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask));
@@ -93,61 +91,12 @@ namespace Pinta.Core
 		
 		public void RegisterHandlers ()
 		{
-			Open.Activated += HandlePintaCoreActionsFileOpenActivated;
-			(OpenRecent as RecentAction).ItemActivated += HandleOpenRecentItemActivated;
 			Save.Activated += HandlePintaCoreActionsFileSaveActivated;
 			SaveAs.Activated += HandlePintaCoreActionsFileSaveAsActivated;
 			Exit.Activated += HandlePintaCoreActionsFileExitActivated;
 		}
-		
 		#endregion
 
-		#region Public Methods
-		public bool OpenFile (string file)
-		{
-			bool fileOpened = false;
-			
-			try {
-				// Open the image and add it to the layers
-				Pixbuf bg = new Pixbuf (file);
-
-				PintaCore.Layers.Clear ();
-				PintaCore.History.Clear ();
-				PintaCore.Layers.DestroySelectionLayer ();
-
-				PintaCore.Workspace.ImageSize = new Cairo.Point (bg.Width, bg.Height);
-				PintaCore.Workspace.CanvasSize = new Cairo.Point (bg.Width, bg.Height);
-
-				PintaCore.Layers.ResetSelectionPath ();
-
-				Layer layer = PintaCore.Layers.AddNewLayer (System.IO.Path.GetFileName (file));
-
-				using (Cairo.Context g = new Cairo.Context (layer.Surface)) {
-					CairoHelper.SetSourcePixbuf (g, bg, 0, 0);
-					g.Paint ();
-				}
-
-				bg.Dispose ();
-
-				PintaCore.Workspace.DocumentPath = System.IO.Path.GetFullPath (file);
-				PintaCore.History.PushNewItem (new BaseHistoryItem ("gtk-open", "Open Image"));
-				PintaCore.Workspace.IsDirty = false;
-				PintaCore.Actions.View.ZoomToWindow.Activate ();
-				PintaCore.Workspace.Invalidate ();
-				
-				fileOpened = true;
-			} catch {
-				MessageDialog md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal, MessageType.Error, ButtonsType.Ok, "Could not open file: {0}", file);
-				md.Title = "Error";
-				
-				md.Run ();
-				md.Destroy ();
-			}
-			
-			return fileOpened;
-		}
-		#endregion
-		
 		static string GetExecutablePathname()
 		{
 			string executablePathName = System.Environment.GetCommandLineArgs ()[0];
@@ -156,105 +105,12 @@ namespace Pinta.Core
 			return executablePathName;
 		}
 		
-		void AddRecentFileUri (string uri)
+		public void AddRecentFileUri (string uri)
 		{
 			RecentManager.Default.AddFull (uri, recentData);
 		}
 		
 		#region Action Handlers
-		private void HandleOpenRecentItemActivated (object sender, EventArgs e)
-		{
-			bool canceled = false;
-
-			if (PintaCore.Workspace.IsDirty) {
-				var primary = Catalog.GetString ("Save the changes to image \"{0}\" before opening a new image?");
-				var secondary = Catalog.GetString ("If you don't save, all changes will be permanently lost.");
-				var markup = "<span weight=\"bold\" size=\"larger\">{0}</span>\n\n{1}\n";
-				markup = string.Format (markup, primary, secondary);
-
-				var md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal,
-											MessageType.Question, ButtonsType.None, true,markup,
-											System.IO.Path.GetFileName (PintaCore.Workspace.Filename));
-
-				md.AddButton (Catalog.GetString ("Continue without saving"), ResponseType.No);
-				md.AddButton (Stock.Cancel, ResponseType.Cancel);
-				md.AddButton (Stock.Save, ResponseType.Yes);
-
-				md.DefaultResponse = ResponseType.Cancel;
-
-				var response = (ResponseType)md.Run ();
-				md.Destroy ();
-
-				if (response == ResponseType.Yes) {
-					Save.Activate ();
-				}
-				else {
-					canceled = response == ResponseType.Cancel;
-				}
-			}
-
-			if (!canceled) {
-				string fileUri = (sender as RecentAction).CurrentUri;
-
-				OpenFile (new Uri (fileUri).LocalPath);
-
-				PintaCore.Workspace.ActiveDocument.HasFile = true;
-			}
-		}
-
-
-		private void HandlePintaCoreActionsFileOpenActivated (object sender, EventArgs e)
-		{
-			bool canceled = false;
-
-			if (PintaCore.Workspace.IsDirty) {
-				var primary = Catalog.GetString ("Save the changes to image \"{0}\" before opening a new image?");
-				var secondary = Catalog.GetString ("If you don't save, all changes will be permanently lost.");
-				var markup = "<span weight=\"bold\" size=\"larger\">{0}</span>\n\n{1}\n";
-				markup = string.Format (markup, primary, secondary);
-
-				var md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal,
-				                            MessageType.Question, ButtonsType.None, true,
-				                            markup,
-				                            System.IO.Path.GetFileName (PintaCore.Workspace.Filename));
-
-				md.AddButton (Catalog.GetString ("Continue without saving"), ResponseType.No);
-				md.AddButton (Stock.Cancel, ResponseType.Cancel);
-				md.AddButton (Stock.Save, ResponseType.Yes);
-
-				md.DefaultResponse = ResponseType.Cancel;
-
-				ResponseType response = (ResponseType)md.Run ();
-				md.Destroy ();
-
-				if (response == ResponseType.Yes) {
-					Save.Activate ();
-				}
-				else {
-					canceled = response == ResponseType.Cancel;
-				}
-			}
-
-			if (!canceled) {
-				var fcd = new Gtk.FileChooserDialog (Catalog.GetString ("Open Image File"), PintaCore.Chrome.MainWindow,
-														FileChooserAction.Open, Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
-														Gtk.Stock.Open, Gtk.ResponseType.Ok);
-
-				int response = fcd.Run ();
-
-			
-				if (response == (int)Gtk.ResponseType.Ok) {
-					if (OpenFile (fcd.Filename)) {
-						AddRecentFileUri (fcd.Uri);
-
-						PintaCore.Workspace.ActiveDocument.HasFile = true;
-					}
-				}
-	
-				fcd.Destroy ();
-			}
-		}
-		
 		private void HandlePintaCoreActionsFileSaveActivated (object sender, EventArgs e)
 		{
 			if (PintaCore.Workspace.ActiveDocument.HasFile)

@@ -41,6 +41,9 @@ namespace Pinta
 			main_window = window;
 			
 			PintaCore.Actions.File.New.Activated += HandlePintaCoreActionsFileNewActivated;
+			PintaCore.Actions.File.Open.Activated += HandlePintaCoreActionsFileOpenActivated;
+			PintaCore.Actions.File.OpenRecent.ItemActivated += HandleOpenRecentItemActivated;
+			PintaCore.Actions.File.Close.Activated += HandlePintaCoreActionsFileCloseActivated;
 			PintaCore.Actions.Image.Resize.Activated += HandlePintaCoreActionsImageResizeActivated;
 			PintaCore.Actions.Image.CanvasSize.Activated += HandlePintaCoreActionsImageCanvasSizeActivated;
 			PintaCore.Actions.Layers.Properties.Activated += HandlePintaCoreActionsLayersPropertiesActivated;
@@ -157,6 +160,115 @@ namespace Pinta
 			}
 
 			dialog.Destroy ();
+		}
+
+		private void HandleOpenRecentItemActivated (object sender, EventArgs e)
+		{
+			bool canceled = false;
+
+			if (PintaCore.Workspace.IsDirty) {
+				var primary = Catalog.GetString ("Save the changes to image \"{0}\" before opening a new image?");
+				var secondary = Catalog.GetString ("If you don't save, all changes will be permanently lost.");
+				var markup = "<span weight=\"bold\" size=\"larger\">{0}</span>\n\n{1}\n";
+				markup = string.Format (markup, primary, secondary);
+
+				var md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal,
+											MessageType.Question, ButtonsType.None, true,markup,
+											System.IO.Path.GetFileName (PintaCore.Workspace.Filename));
+
+				md.AddButton (Catalog.GetString ("Continue without saving"), ResponseType.No);
+				md.AddButton (Stock.Cancel, ResponseType.Cancel);
+				md.AddButton (Stock.Save, ResponseType.Yes);
+
+				md.DefaultResponse = ResponseType.Cancel;
+
+				var response = (ResponseType)md.Run ();
+				md.Destroy ();
+
+				if (response == ResponseType.Yes) {
+					PintaCore.Actions.File.Save.Activate ();
+				}
+				else {
+					canceled = response == ResponseType.Cancel;
+				}
+			}
+
+			if (!canceled) {
+				string fileUri = (sender as RecentAction).CurrentUri;
+
+				main_window.OpenFile (new Uri (fileUri).LocalPath);
+
+				PintaCore.Workspace.ActiveDocument.HasFile = true;
+			}
+		}
+
+
+		private void HandlePintaCoreActionsFileOpenActivated (object sender, EventArgs e)
+		{
+			bool canceled = false;
+
+			if (PintaCore.Workspace.IsDirty) {
+				var primary = Catalog.GetString ("Save the changes to image \"{0}\" before opening a new image?");
+				var secondary = Catalog.GetString ("If you don't save, all changes will be permanently lost.");
+				var markup = "<span weight=\"bold\" size=\"larger\">{0}</span>\n\n{1}\n";
+				markup = string.Format (markup, primary, secondary);
+
+				var md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal,
+				                            MessageType.Question, ButtonsType.None, true,
+				                            markup,
+				                            System.IO.Path.GetFileName (PintaCore.Workspace.Filename));
+
+				md.AddButton (Catalog.GetString ("Continue without saving"), ResponseType.No);
+				md.AddButton (Stock.Cancel, ResponseType.Cancel);
+				md.AddButton (Stock.Save, ResponseType.Yes);
+
+				md.DefaultResponse = ResponseType.Cancel;
+
+				ResponseType response = (ResponseType)md.Run ();
+				md.Destroy ();
+
+				if (response == ResponseType.Yes) {
+					PintaCore.Actions.File.Save.Activate ();
+				}
+				else {
+					canceled = response == ResponseType.Cancel;
+				}
+			}
+
+			if (!canceled) {
+				var fcd = new Gtk.FileChooserDialog (Catalog.GetString ("Open Image File"), PintaCore.Chrome.MainWindow,
+														FileChooserAction.Open, Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
+														Gtk.Stock.Open, Gtk.ResponseType.Ok);
+
+				int response = fcd.Run ();
+
+			
+				if (response == (int)Gtk.ResponseType.Ok) {
+					if (main_window.OpenFile (fcd.Filename)) {
+						PintaCore.Actions.File.AddRecentFileUri (fcd.Uri);
+
+						PintaCore.Workspace.ActiveDocument.HasFile = true;
+					}
+				}
+	
+				fcd.Destroy ();
+			}
+		}
+
+		private void HandlePintaCoreActionsFileCloseActivated (object sender, EventArgs e)
+		{
+			var markup = " Do you really want to close {0} ?\n";
+
+			var md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal,
+			                            MessageType.Question, ButtonsType.OkCancel, 
+			                            markup,
+			                            System.IO.Path.GetFileName (PintaCore.Workspace.Filename));
+			ResponseType response = (ResponseType)md.Run ();
+				md.Destroy ();
+
+				if (response == ResponseType.Ok) {
+					//TODO remove from tabgrid and switch file on workspace mgr
+				}
 		}
 
 		private void HandlePintaCoreActionsImageResizeActivated (object sender, EventArgs e)

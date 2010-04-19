@@ -74,9 +74,25 @@ namespace Pinta.Gui.Widgets
 			thumbnails = new List<ImageSurface> ();
 			offset = 0;
 			selectedIndex = 0;
+			PintaCore.Chrome.DrawingArea.ExposeEvent += delegate {
+				UpdateCurrentThumbnail ();
+			};
 		}
-		
+
+		void UpdateCurrentThumbnail ()
+		{
+			ImageSurface thumbnail = ReduceSurface (PintaCore.Layers.GetFlattenedImage ());
+			thumbnails[selectedIndex] = thumbnail;
+		}
+
 		public void AddThumbnail (ImageSurface surf)
+		{
+			ImageSurface thumbnail = ReduceSurface (surf);
+			thumbnails.Add (thumbnail);
+			//TODO selected and move offset if needed
+		}
+
+		protected ImageSurface ReduceSurface (ImageSurface surf)
 		{
 			int rectWidth;
 			int rectHeight;
@@ -103,10 +119,9 @@ namespace Pinta.Gui.Widgets
 				g.SetSourceSurface (surf, 0, 0);
 				g.Paint ();
 			}
-			thumbnails.Add (thumbnail);
-			//TODO selected and move offset if needed
+			return thumbnail;
 		}
-		
+
 		protected override bool OnExposeEvent (Gdk.EventExpose ev)
 		{
 			base.OnExposeEvent (ev);
