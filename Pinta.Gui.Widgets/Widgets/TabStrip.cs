@@ -50,9 +50,10 @@ namespace Pinta.Gui.Widgets
 			}
 			set {
 				if (selectedIndex != value) {
+					int old = selectedIndex;
 					selectedIndex = value;
 					this.GdkWindow.Invalidate ();
-					OnChanged ();
+					OnChanged (old);
 				}
 			}
 		}
@@ -76,12 +77,9 @@ namespace Pinta.Gui.Widgets
 			thumbnails = new List<ImageSurface> ();
 			offset = 0;
 			selectedIndex = 0;
-			PintaCore.Chrome.DrawingArea.ExposeEvent += delegate {
-				UpdateCurrentThumbnail ();
-			};
 		}
 
-		void UpdateCurrentThumbnail ()
+		public void UpdateCurrentThumbnail ()
 		{
 			ImageSurface thumbnail = ReduceSurface (PintaCore.Layers.GetFlattenedImage ());
 			thumbnails[selectedIndex] = thumbnail;
@@ -250,12 +248,12 @@ namespace Pinta.Gui.Widgets
 		}
 		
 		#region Public Events
-		public event EventHandler Changed;
+		public event EventHandler<TabStripChangedEventArgs> Changed;
 		
-		protected virtual void OnChanged ()
+		protected virtual void OnChanged (int oldIndex)
 		{
 			if (Changed != null) {
-				Changed (this, EventArgs.Empty);
+				Changed (this, new TabStripChangedEventArgs(oldIndex, selectedIndex));
 			}
 		}
 		#endregion
@@ -264,8 +262,32 @@ namespace Pinta.Gui.Widgets
 		{
 			thumbnails.Remove (thumbnails[selectedIndex]);
 			
+			PintaCore.Documents.Remove (SelectedIndex);
+			
 			if (SelectedIndex >= thumbnails.Count)
 				SelectedIndex--;
+		}
+	}
+	
+	public class TabStripChangedEventArgs : EventArgs
+	{
+		public TabStripChangedEventArgs(int oldIndex, int newIndex) : base ()
+		{
+			this.oldIndex = oldIndex;
+			this.newIndex = newIndex;				
+		}
+		private int oldIndex;
+		private int newIndex;
+		public int OldIndex {
+			get {
+				return oldIndex;
+			}
+		}
+
+		public int NewIndex {
+			get {
+				return newIndex;
+			}
 		}
 	}
 }

@@ -137,6 +137,10 @@ namespace Pinta
 			gr = new GridRenderer (cr);
 			
 			tabstrip1.Changed += HandleTabstrip1Changed;
+			tabstrip1.AddThumbnail (PintaCore.Layers.GetFlattenedImage ());
+			PintaCore.Chrome.DrawingArea.ExposeEvent += delegate {
+				tabstrip1.UpdateCurrentThumbnail ();
+			};
 			
 			if (Platform.GetOS () == Platform.OS.Mac) {
 				try {
@@ -159,13 +163,6 @@ namespace Pinta
 					// If things don't work out, just use a normal menu.
 				}
 			}
-		}
-
-		void HandleTabstrip1Changed (object sender, EventArgs e)
-		{
-			//if active doc 
-			// save it for restor later
-			//restore the selected one.
 		}
 
 		private void MainWindow_DeleteEvent (object o, DeleteEventArgs args)
@@ -559,12 +556,7 @@ namespace Pinta
 		public bool OpenFile (string file)
 		{
 			bool fileOpened = false;
-			//TODO selector to say if we load it in new layer or in new image.
-			//move that code to workspace mgr and save history,layer and workspace manager
-			//for previous active document before load this new one.
-			//this will be needed for restoring word later if we switch between file.
-			//for design cut workspace manager in 2 : documents mgr and workspace mgr.
-			// documents manager will manage tab grid and MDI 
+			PintaCore.Documents.Save (tabstrip1.SelectedIndex);
 			try {
 				// Open the image and add it to the layers
 				Pixbuf bg = new Pixbuf (file);
@@ -615,11 +607,22 @@ namespace Pinta
 			}
 
 			tabstrip1.RemoveCurrentThumbnail ();
+			PintaCore.Documents.Remove (tabstrip1.SelectedIndex);
 		}
 		
 		public void AddDocument (Cairo.ImageSurface surf)
 		{
 			tabstrip1.AddThumbnail (surf);
+			tabstrip1.SelectedIndex = tabstrip1.Count - 1;
+		}
+
+		void HandleTabstrip1Changed (object sender, Pinta.Gui.Widgets.TabStripChangedEventArgs  e)
+		{
+			if (PintaCore.Workspace.ActiveDocument != null)
+			{
+				PintaCore.Documents.Save (e.OldIndex);
+			}
+			PintaCore.Documents.Restore (e.NewIndex);
 		}
 	}
 }

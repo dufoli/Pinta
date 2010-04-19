@@ -136,6 +136,9 @@ namespace Pinta
 			int response = dialog.Run ();
 
 			if (response == (int)Gtk.ResponseType.Ok) {
+				//anyway must be saved with exposed event handler
+				//so do not really needed.
+				//PintaCore.Documents.Save (tabstrip1.SelectedIndex);
 				PintaCore.Workspace.ActiveDocument.HasFile = false;
 				PintaCore.Workspace.ImageSize = new Cairo.Point (dialog.NewImageWidth, dialog.NewImageHeight);
 				PintaCore.Workspace.CanvasSize = new Cairo.Point (dialog.NewImageWidth, dialog.NewImageHeight);

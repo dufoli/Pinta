@@ -58,6 +58,11 @@ namespace Pinta.Core
 			}
 		}
 		
+		public List<BaseHistoryItem> History {
+			get { return history; }
+		}
+		
+		
 		public void PushNewItem (BaseHistoryItem new_item)
 		{
 			
@@ -182,5 +187,17 @@ namespace Pinta.Core
 		public event EventHandler ActionUndone;
 		public event EventHandler ActionRedone;
 		#endregion
+		
+		public void Save (DocumentManager.DocumentData doc)
+		{
+			doc.history = history;
+			doc.historyPointer = historyPointer;
+		}
+		
+		public void Restore (DocumentManager.DocumentData doc)
+		{
+			history = doc.history;
+			historyPointer = doc.historyPointer;
+		}
 	}
 }

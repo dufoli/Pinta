@@ -163,6 +163,7 @@
     <Compile Include="Classes\GradientRenderer.cs" />
     <Compile Include="Classes\GradientRenderers.cs" />
     <Compile Include="Classes\GridRenderer.cs" />
+    <Compile Include="Managers\DocumentManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

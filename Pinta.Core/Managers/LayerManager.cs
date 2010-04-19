@@ -580,5 +580,21 @@ namespace Pinta.Core
 			return layers.GetEnumerator ();
 		}
 		#endregion
+		
+		public void Save (DocumentManager.DocumentData doc)
+		{
+			doc.current_layer = current_layer;
+			doc.layers = layers;
+			doc.selection_path = selection_path;
+			doc.show_selection = ShowSelection;
+		}
+		
+		public void Restore (DocumentManager.DocumentData doc)
+		{
+			layers = doc.layers;
+			current_layer = doc.current_layer;
+			selection_path = doc.selection_path;
+			ShowSelection = doc.show_selection;
+		}
 	}
 }
