@@ -93,41 +93,6 @@ namespace Pinta
 		#region Handlers
 		private void HandlePintaCoreActionsFileNewActivated (object sender, EventArgs e)
 		{
-			bool canceled = false;
-
-			if (PintaCore.Workspace.IsDirty) {
-				var primary = Catalog.GetString ("Save the changes to image \"{0}\" before creating a new one?");
-				var secondary = Catalog.GetString ("If you don't save, all changes will be permanently lost.");
-				var markup = "<span weight=\"bold\" size=\"larger\">{0}</span>\n\n{1}\n";
-				markup = string.Format (markup, primary, secondary);
-
-				var md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal,
-				                            MessageType.Question, ButtonsType.None, true,
-				                            markup,
-				                            System.IO.Path.GetFileName (PintaCore.Workspace.Filename));
-
-				md.AddButton (Catalog.GetString ("Continue without saving"), ResponseType.No);
-				md.AddButton (Stock.Cancel, ResponseType.Cancel);
-				md.AddButton (Stock.Save, ResponseType.Yes);
-
-				md.DefaultResponse = ResponseType.Cancel;
-
-				ResponseType saveResponse = (ResponseType)md.Run ();
-				md.Destroy ();
-
-				if (saveResponse == ResponseType.Yes) {
-					PintaCore.Actions.File.Save.Activate ();
-				}
-				else {
-					canceled = saveResponse == ResponseType.Cancel;
-				}
-			}
-
-			if (canceled) {
-				return;
-			}
-
-
 			NewImageDialog dialog = new NewImageDialog ();
 
 			dialog.ParentWindow = main_window.GdkWindow;
@@ -143,10 +108,10 @@ namespace Pinta
 				PintaCore.Workspace.ImageSize = new Cairo.Point (dialog.NewImageWidth, dialog.NewImageHeight);
 				PintaCore.Workspace.CanvasSize = new Cairo.Point (dialog.NewImageWidth, dialog.NewImageHeight);
 				
-				PintaCore.Layers.Clear ();
-				PintaCore.History.Clear ();
+				PintaCore.Layers.Clear (false);
+				PintaCore.History.Clear (false);
 				PintaCore.Layers.DestroySelectionLayer ();
-				PintaCore.Layers.ResetSelectionPath ();
+				PintaCore.Layers.ResetSelectionPath (false);
 
 				// Start with an empty white layer
 				Layer background = PintaCore.Layers.AddNewLayer ("Background");
@@ -168,95 +133,30 @@ namespace Pinta
 
 		private void HandleOpenRecentItemActivated (object sender, EventArgs e)
 		{
-			bool canceled = false;
-
-			if (PintaCore.Workspace.IsDirty) {
-				var primary = Catalog.GetString ("Save the changes to image \"{0}\" before opening a new image?");
-				var secondary = Catalog.GetString ("If you don't save, all changes will be permanently lost.");
-				var markup = "<span weight=\"bold\" size=\"larger\">{0}</span>\n\n{1}\n";
-				markup = string.Format (markup, primary, secondary);
-
-				var md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal,
-											MessageType.Question, ButtonsType.None, true,markup,
-											System.IO.Path.GetFileName (PintaCore.Workspace.Filename));
-
-				md.AddButton (Catalog.GetString ("Continue without saving"), ResponseType.No);
-				md.AddButton (Stock.Cancel, ResponseType.Cancel);
-				md.AddButton (Stock.Save, ResponseType.Yes);
-
-				md.DefaultResponse = ResponseType.Cancel;
-
-				var response = (ResponseType)md.Run ();
-				md.Destroy ();
-
-				if (response == ResponseType.Yes) {
-					PintaCore.Actions.File.Save.Activate ();
-				}
-				else {
-					canceled = response == ResponseType.Cancel;
-				}
-			}
-
-			if (!canceled) {
-				string fileUri = (sender as RecentAction).CurrentUri;
-
-				main_window.OpenFile (new Uri (fileUri).LocalPath);
-
-				PintaCore.Workspace.ActiveDocument.HasFile = true;
-			}
+			string fileUri = (sender as RecentAction).CurrentUri;
+			main_window.OpenFile (new Uri (fileUri).LocalPath);
+			PintaCore.Workspace.ActiveDocument.HasFile = true;
 		}
 
 
 		private void HandlePintaCoreActionsFileOpenActivated (object sender, EventArgs e)
 		{
-			bool canceled = false;
+			var fcd = new Gtk.FileChooserDialog (Catalog.GetString ("Open Image File"), PintaCore.Chrome.MainWindow,
+													FileChooserAction.Open, Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
+													Gtk.Stock.Open, Gtk.ResponseType.Ok);
 
-			if (PintaCore.Workspace.IsDirty) {
-				var primary = Catalog.GetString ("Save the changes to image \"{0}\" before opening a new image?");
-				var secondary = Catalog.GetString ("If you don't save, all changes will be permanently lost.");
-				var markup = "<span weight=\"bold\" size=\"larger\">{0}</span>\n\n{1}\n";
-				markup = string.Format (markup, primary, secondary);
+			int response = fcd.Run ();
 
-				var md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal,
-				                            MessageType.Question, ButtonsType.None, true,
-				                            markup,
-				                            System.IO.Path.GetFileName (PintaCore.Workspace.Filename));
+		
+			if (response == (int)Gtk.ResponseType.Ok) {
+				if (main_window.OpenFile (fcd.Filename)) {
+					PintaCore.Actions.File.AddRecentFileUri (fcd.Uri);
 
-				md.AddButton (Catalog.GetString ("Continue without saving"), ResponseType.No);
-				md.AddButton (Stock.Cancel, ResponseType.Cancel);
-				md.AddButton (Stock.Save, ResponseType.Yes);
-
-				md.DefaultResponse = ResponseType.Cancel;
-
-				ResponseType response = (ResponseType)md.Run ();
-				md.Destroy ();
-
-				if (response == ResponseType.Yes) {
-					PintaCore.Actions.File.Save.Activate ();
-				}
-				else {
-					canceled = response == ResponseType.Cancel;
+					PintaCore.Workspace.ActiveDocument.HasFile = true;
 				}
 			}
 
-			if (!canceled) {
-				var fcd = new Gtk.FileChooserDialog (Catalog.GetString ("Open Image File"), PintaCore.Chrome.MainWindow,
-														FileChooserAction.Open, Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
-														Gtk.Stock.Open, Gtk.ResponseType.Ok);
-
-				int response = fcd.Run ();
-
-			
-				if (response == (int)Gtk.ResponseType.Ok) {
-					if (main_window.OpenFile (fcd.Filename)) {
-						PintaCore.Actions.File.AddRecentFileUri (fcd.Uri);
-
-						PintaCore.Workspace.ActiveDocument.HasFile = true;
-					}
-				}
-	
-				fcd.Destroy ();
-			}
+			fcd.Destroy ();
 		}
 
 		private void HandlePintaCoreActionsFileCloseActivated (object sender, EventArgs e)

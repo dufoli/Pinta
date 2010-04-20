@@ -138,6 +138,7 @@ namespace Pinta
 			
 			tabstrip1.Changed += HandleTabstrip1Changed;
 			tabstrip1.AddThumbnail (PintaCore.Layers.GetFlattenedImage ());
+			PintaCore.Documents.Save (0);
 			PintaCore.Chrome.DrawingArea.ExposeEvent += delegate {
 				tabstrip1.UpdateCurrentThumbnail ();
 			};
@@ -561,14 +562,13 @@ namespace Pinta
 				// Open the image and add it to the layers
 				Pixbuf bg = new Pixbuf (file);
 
-				PintaCore.Layers.Clear ();
-				PintaCore.History.Clear ();
-				PintaCore.Layers.DestroySelectionLayer ();
-
+				PintaCore.Layers.Clear (false);
+				PintaCore.History.Clear (false);
+				
 				PintaCore.Workspace.ImageSize = new Cairo.Point (bg.Width, bg.Height);
 				PintaCore.Workspace.CanvasSize = new Cairo.Point (bg.Width, bg.Height);
 
-				PintaCore.Layers.ResetSelectionPath ();
+				PintaCore.Layers.ResetSelectionPath (false);
 
 				Layer layer = PintaCore.Layers.AddNewLayer (System.IO.Path.GetFileName (file));
 
@@ -580,7 +580,8 @@ namespace Pinta
 				bg.Dispose ();
 
 				AddDocument (PintaCore.Layers.GetFlattenedImage ());
-				
+				PintaCore.Documents.Save (tabstrip1.SelectedIndex);
+
 				PintaCore.Workspace.DocumentPath = System.IO.Path.GetFullPath (file);
 				PintaCore.History.PushNewItem (new BaseHistoryItem ("gtk-open", "Open Image"));
 				PintaCore.Workspace.IsDirty = false;
@@ -588,7 +589,7 @@ namespace Pinta
 				PintaCore.Workspace.Invalidate ();
 				
 				fileOpened = true;
-			} catch {
+			} catch (Exception e) {
 				MessageDialog md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal, MessageType.Error, ButtonsType.Ok, "Could not open file: {0}", file);
 				md.Title = "Error";
 				
@@ -613,15 +614,12 @@ namespace Pinta
 		public void AddDocument (Cairo.ImageSurface surf)
 		{
 			tabstrip1.AddThumbnail (surf);
-			tabstrip1.SelectedIndex = tabstrip1.Count - 1;
+			//tabstrip1.SelectedIndex = tabstrip1.Count - 1;
 		}
 
 		void HandleTabstrip1Changed (object sender, Pinta.Gui.Widgets.TabStripChangedEventArgs  e)
 		{
-			if (PintaCore.Workspace.ActiveDocument != null)
-			{
-				PintaCore.Documents.Save (e.OldIndex);
-			}
+			//PintaCore.Documents.Save (e.OldIndex);
 			PintaCore.Documents.Restore (e.NewIndex);
 		}
 	}

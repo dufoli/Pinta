@@ -177,7 +177,7 @@ namespace Pinta.Core
 			}
 
 			if (!canceled) {
-				PintaCore.History.Clear ();
+				PintaCore.History.Clear (true);
 				(PintaCore.Layers.SelectionPath as IDisposable).Dispose ();
 				Application.Quit ();
 			}

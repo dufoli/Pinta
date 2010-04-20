@@ -83,13 +83,16 @@ namespace Pinta.Gui.Widgets
 		{
 			ImageSurface thumbnail = ReduceSurface (PintaCore.Layers.GetFlattenedImage ());
 			thumbnails[selectedIndex] = thumbnail;
+			this.GdkWindow.Invalidate ();
 		}
 
 		public void AddThumbnail (ImageSurface surf)
 		{
 			ImageSurface thumbnail = ReduceSurface (surf);
 			thumbnails.Add (thumbnail);
-			//TODO selected and move offset if needed
+			selectedIndex = Count - 1;
+			this.GdkWindow.Invalidate ();
+			//TODO move offset if needed
 		}
 
 		protected ImageSurface ReduceSurface (ImageSurface surf)

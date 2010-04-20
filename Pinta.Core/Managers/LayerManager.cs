@@ -61,7 +61,7 @@ namespace Pinta.Core
 			selection_layer = CreateLayer ("Selection Layer");
 			selection_layer.Hidden = true;
 			
-			ResetSelectionPath ();
+			ResetSelectionPath (true);
 			
 			transparent_layer = CreateLayer ("Transparent", 16, 16);
 			transparent_layer.Tiled = true;
@@ -137,12 +137,13 @@ namespace Pinta.Core
 		#endregion
 
 		#region Public Methods
-		public void Clear ()
+		public void Clear (bool dispose)
 		{
 			while (layers.Count > 0) {
 				Layer l = layers[layers.Count - 1];
 				layers.RemoveAt (layers.Count - 1);
-				(l.Surface as IDisposable).Dispose ();
+				if (dispose)
+					(l.Surface as IDisposable).Dispose ();
 			}
 			
 			current_layer = -1;
@@ -468,14 +469,14 @@ namespace Pinta.Core
 			SelectionLayer.Offset = new PointD (0, 0);
 		}
 
-		public void ResetSelectionPath ()
+		public void ResetSelectionPath (bool dispose)
 		{
 			Path old = SelectionPath;
 			
 			using (Cairo.Context g = new Cairo.Context (selection_layer.Surface))
 				SelectionPath = g.CreateRectanglePath (new Rectangle (0, 0, PintaCore.Workspace.ImageSize.X, PintaCore.Workspace.ImageSize.Y));
 			
-			if (old != null)
+			if (old != null && dispose)
 				(old as IDisposable).Dispose ();
 				
 			ShowSelection = false;
@@ -580,7 +581,7 @@ namespace Pinta.Core
 			return layers.GetEnumerator ();
 		}
 		#endregion
-		
+
 		public void Save (DocumentManager.DocumentData doc)
 		{
 			doc.current_layer = current_layer;
@@ -588,7 +589,7 @@ namespace Pinta.Core
 			doc.selection_path = selection_path;
 			doc.show_selection = ShowSelection;
 		}
-		
+
 		public void Restore (DocumentManager.DocumentData doc)
 		{
 			layers = doc.layers;

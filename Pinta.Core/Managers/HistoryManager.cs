@@ -143,9 +143,10 @@ namespace Pinta.Core
 			OnActionRedone ();
 		}
 		
-		public void Clear ()
+		public void Clear (bool dispose)
 		{
-			history.ForEach (delegate(BaseHistoryItem item) { item.Dispose (); } );
+			if (dispose)
+				history.ForEach (delegate(BaseHistoryItem item) { item.Dispose (); } );
 			history.Clear();	
 			ListStore.Clear ();	
 			historyPointer = -1;
@@ -192,12 +193,14 @@ namespace Pinta.Core
 		{
 			doc.history = history;
 			doc.historyPointer = historyPointer;
+			doc.ListStore = ListStore;
 		}
 		
 		public void Restore (DocumentManager.DocumentData doc)
 		{
 			history = doc.history;
 			historyPointer = doc.historyPointer;
+			ListStore = doc.ListStore;
 		}
 	}
 }

@@ -144,7 +144,7 @@ namespace Pinta.Core
 			SelectionHistoryItem hist = new SelectionHistoryItem ("Menu.Edit.SelectAll.png", Mono.Unix.Catalog.GetString ("Select All"));
 			hist.TakeSnapshot ();
 
-			PintaCore.Layers.ResetSelectionPath ();
+			PintaCore.Layers.ResetSelectionPath (true);
 			PintaCore.Layers.ShowSelection = true;
 
 			PintaCore.History.PushNewItem (hist);
@@ -175,7 +175,7 @@ namespace Pinta.Core
 			SelectionHistoryItem hist = new SelectionHistoryItem ("Menu.Edit.Deselect.png", Mono.Unix.Catalog.GetString ("Deselect"));
 			hist.TakeSnapshot ();
 			
-			PintaCore.Layers.ResetSelectionPath ();
+			PintaCore.Layers.ResetSelectionPath (true);
 			
 			PintaCore.History.PushNewItem (hist);
 			PintaCore.Workspace.Invalidate ();

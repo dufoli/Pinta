@@ -1,4 +1,4 @@
-﻿// 
+// 
 // ResizeHistoryItem.cs
 //  
 // Author:
@@ -68,7 +68,7 @@ namespace Pinta.Core
 					
 				PintaCore.Layers.ShowSelection = true;
 			} else {
-				PintaCore.Layers.ResetSelectionPath ();
+				PintaCore.Layers.ResetSelectionPath (true);
 			}
 			
 			PintaCore.Workspace.Invalidate ();
@@ -87,7 +87,7 @@ namespace Pinta.Core
 
 			base.Redo ();
 
-			PintaCore.Layers.ResetSelectionPath ();
+			PintaCore.Layers.ResetSelectionPath (true);
 			PintaCore.Workspace.Invalidate ();
 		}
 
