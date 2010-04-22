@@ -2,9 +2,9 @@
 // ZoomBlurEffect.cs
 //  
 // Author:
-//       dufoli <${AuthorEmail}>
+//       Olivier Dufour <olivier.duff@gmail.com>
 // 
-// Copyright (c) 2010 dufoli
+// Copyright (c) 2010 Olivier Dufour
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -44,27 +44,16 @@ namespace Pinta.Core
 			get { return true; }
 		}
 
-		public ZoomBlurData Data { get; private set; }
+		public ZoomBlurData Data { get { return EffectData as ZoomBlurData; } }
 
 		public ZoomBlurEffect ()
 		{
-			Data = new ZoomBlurData ();
+			EffectData = new ZoomBlurData ();
 		}
 
 		public override bool LaunchConfiguration ()
 		{
-			SimpleEffectDialog dialog = new SimpleEffectDialog (Text, PintaCore.Resources.GetIcon (Icon), Data);
-
-			int response = dialog.Run ();
-
-			if (response == (int)Gtk.ResponseType.Ok) {
-				dialog.Destroy ();
-				return !Data.IsEmpty;
-			}
-
-			dialog.Destroy ();
-
-			return false;
+			return EffectHelper.LaunchSimpleEffectDialog (this);
 		}
 
 		#region Algorithm Code Ported From PDN
@@ -148,7 +137,7 @@ namespace Pinta.Core
 		}
 		#endregion
 
-		public class ZoomBlurData
+		public class ZoomBlurData : EffectData
 		{
 			[MinimumValue (0), MaximumValue (100)]
 			public int Amount = 10;
@@ -156,7 +145,7 @@ namespace Pinta.Core
 			public Gdk.Point Offset = new Gdk.Point (0, 0);
 
 			[Skip]
-			public bool IsEmpty { get { return (Amount == 0); } }
+			public override bool IsDefault { get { return Amount == 0; } }
 		}
 	}
 }

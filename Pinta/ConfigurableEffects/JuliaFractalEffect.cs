@@ -2,9 +2,9 @@
 // JuliaFractalEffect.cs
 //  
 // Author:
-//       dufoli <${AuthorEmail}>
+//       Olivier Dufour <olivier.duff@gmail.com>
 // 
-// Copyright (c) 2010 dufoli
+// Copyright (c) 2010 Olivier Dufour
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -44,27 +44,16 @@ namespace Pinta.Core
 			get { return true; }
 		}
 
-		public JuliaFractalData Data { get; private set; }
+		public JuliaFractalData Data { get { return EffectData as JuliaFractalData; } }
 
 		public JuliaFractalEffect ()
 		{
-			Data = new JuliaFractalData ();
+			EffectData = new JuliaFractalData ();
 		}
 
 		public override bool LaunchConfiguration ()
 		{
-			SimpleEffectDialog dialog = new SimpleEffectDialog (Text, PintaCore.Resources.GetIcon (Icon), Data);
-			
-			int response = dialog.Run ();
-			
-			if (response == (int)Gtk.ResponseType.Ok) {
-				dialog.Destroy ();
-				return true;
-			}
-			
-			dialog.Destroy ();
-			
-			return false;
+			return EffectHelper.LaunchSimpleEffectDialog (this);
 		}
 
 		#region Algorithm Code Ported From PDN
@@ -148,7 +137,7 @@ namespace Pinta.Core
 		}
 		#endregion
 
-		public class JuliaFractalData
+		public class JuliaFractalData : EffectData
 		{
 			[MinimumValue(1), MaximumValue(10)]
 			public int Factor = 4;

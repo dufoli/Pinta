@@ -46,21 +46,24 @@ namespace Pinta
 			PintaCore.Actions.File.Close.Activated += HandlePintaCoreActionsFileCloseActivated;
 			PintaCore.Actions.Image.Resize.Activated += HandlePintaCoreActionsImageResizeActivated;
 			PintaCore.Actions.Image.CanvasSize.Activated += HandlePintaCoreActionsImageCanvasSizeActivated;
+			
 			PintaCore.Actions.Layers.Properties.Activated += HandlePintaCoreActionsLayersPropertiesActivated;
+			
 			PintaCore.Actions.Adjustments.BrightnessContrast.Activated += HandleEffectActivated<BrightnessContrastEffect>;
 			PintaCore.Actions.Adjustments.Curves.Activated += HandleAdjustmentsCurvesActivated;
 			PintaCore.Actions.Adjustments.Levels.Activated += HandleAdjustmentsLevelsActivated;
 			PintaCore.Actions.Adjustments.Posterize.Activated += HandleEffectActivated <PosterizeEffect>;
 			PintaCore.Actions.Adjustments.HueSaturation.Activated += HandleEffectActivated<HueSaturationEffect>;
+			
 			PintaCore.Actions.Effects.InkSketch.Activated += HandleEffectActivated<InkSketchEffect>;
 			PintaCore.Actions.Effects.OilPainting.Activated += HandleEffectActivated<OilPaintingEffect>;
 			PintaCore.Actions.Effects.PencilSketch.Activated += HandleEffectActivated<PencilSketchEffect>;
 			PintaCore.Actions.Effects.Fragment.Activated += HandleEffectActivated<FragmentEffect>;
 			PintaCore.Actions.Effects.GaussianBlur.Activated += HandleEffectActivated<GaussianBlurEffect>;
-            PintaCore.Actions.Effects.SurfaceBlur.Activated += HandleEffectSurfaceBlurActivated;
-            PintaCore.Actions.Effects.ZoomBlur.Activated += HandleEffectZoomBlurActivated;
-            PintaCore.Actions.Effects.Unfocus.Activated += HandleEffectUnfocusActivated;
-			PintaCore.Actions.Effects.RadialBlur.Activated += HandleEffectRadialBlurActivated;
+			PintaCore.Actions.Effects.SurfaceBlur.Activated += HandleEffectActivated<SurfaceBlurEffect>;
+			PintaCore.Actions.Effects.ZoomBlur.Activated += HandleEffectActivated<ZoomBlurEffect>;
+			PintaCore.Actions.Effects.Unfocus.Activated += HandleEffectActivated<UnfocusEffect>;
+			PintaCore.Actions.Effects.RadialBlur.Activated += HandleEffectActivated<RadialBlurEffect>;
 			PintaCore.Actions.Effects.Bulge.Activated += HandleEffectActivated <BulgeEffect>;
 			PintaCore.Actions.Effects.Dents.Activated += HandleEffectActivated <DentsEffect>;
 			PintaCore.Actions.Effects.PolarInversion.Activated += HandleEffectActivated <PolarInversionEffect>;
@@ -69,9 +72,9 @@ namespace Pinta
 			PintaCore.Actions.Effects.RedEyeRemove.Activated += HandleEffectActivated <RedEyeRemoveEffect>;
 			PintaCore.Actions.Effects.Sharpen.Activated += HandleEffectActivated <SharpenEffect>;
 			PintaCore.Actions.Effects.SoftenPortrait.Activated += HandleEffectActivated <SoftenPortraitEffect>;
-			PintaCore.Actions.Effects.Clouds.Activated += HandleEffectCloudsActivated;
-			PintaCore.Actions.Effects.JuliaFractal.Activated += HandleEffectJuliaFractalActivated;
-			PintaCore.Actions.Effects.MandelbrotFractal.Activated += HandleEffectMandelbrotFractalActivated;
+			PintaCore.Actions.Effects.Clouds.Activated += HandleEffectActivated<CloudsEffect>;
+			PintaCore.Actions.Effects.JuliaFractal.Activated += HandleEffectActivated<JuliaFractalEffect>;
+			PintaCore.Actions.Effects.MandelbrotFractal.Activated += HandleEffectActivated<MandelbrotFractalEffect>;
 			PintaCore.Actions.Effects.EdgeDetect.Activated += HandleEffectActivated <EdgeDetectEffect>;
 			PintaCore.Actions.Effects.Twist.Activated += HandleEffectActivated<TwistEffect>;
 			PintaCore.Actions.Effects.Tile.Activated += HandleEffectActivated<TileEffect>;
@@ -79,10 +82,11 @@ namespace Pinta
 			PintaCore.Actions.Effects.FrostedGlass.Activated += HandleEffectActivated<FrostedGlassEffect>;
 			PintaCore.Actions.Effects.Relief.Activated += HandleEffectActivated <ReliefEffect>;
 			PintaCore.Actions.Effects.Emboss.Activated += HandleEffectActivated<EmbossEffect>;
-            PintaCore.Actions.Effects.AddNoise.Activated += HandleEffectAddNoiseActivated;
-            PintaCore.Actions.Effects.Median.Activated += HandleEffectMedianActivated;
-            PintaCore.Actions.Effects.ReduceNoise.Activated += HandleEffectReduceNoiseActivated;
-			PintaCore.Actions.Effects.Outline.Activated += HandleEffectOutlineActivated;
+			PintaCore.Actions.Effects.AddNoise.Activated += HandleEffectActivated<AddNoiseEffect>;
+			PintaCore.Actions.Effects.Median.Activated += HandleEffectActivated<MedianEffect>;
+			PintaCore.Actions.Effects.ReduceNoise.Activated += HandleEffectActivated<ReduceNoiseEffect>;
+			PintaCore.Actions.Effects.Outline.Activated += HandleEffectActivated<OutlineEffect>;
+			
 			PintaCore.Actions.View.Rulers.Toggled += HandlePintaCoreActionsViewRulersToggled;
 			PintaCore.Actions.View.Pixels.Activated += HandlePixelsActivated;
 			PintaCore.Actions.View.Inches.Activated += HandleInchesActivated;
@@ -105,8 +109,8 @@ namespace Pinta
 				//so do not really needed.
 				//PintaCore.Documents.Save (tabstrip1.SelectedIndex);
 				PintaCore.Workspace.ActiveDocument.HasFile = false;
-				PintaCore.Workspace.ImageSize = new Cairo.Point (dialog.NewImageWidth, dialog.NewImageHeight);
-				PintaCore.Workspace.CanvasSize = new Cairo.Point (dialog.NewImageWidth, dialog.NewImageHeight);
+				PintaCore.Workspace.ImageSize = new Gdk.Size (dialog.NewImageWidth, dialog.NewImageHeight);
+				PintaCore.Workspace.CanvasSize = new Gdk.Size (dialog.NewImageWidth, dialog.NewImageHeight);
 				
 				PintaCore.Layers.Clear (false);
 				PintaCore.History.Clear (false);
@@ -288,61 +292,6 @@ namespace Pinta
 		{
 			PintaCore.Actions.Adjustments.PerformEffect (new LevelsEffect ());
 		}
-
-		private void HandleEffectSurfaceBlurActivated(object sender, EventArgs e)
-        {
-            PintaCore.Actions.Adjustments.PerformEffect(new SurfaceBlurEffect());
-        }
-
-		private void HandleEffectZoomBlurActivated(object sender, EventArgs e)
-        {
-            PintaCore.Actions.Adjustments.PerformEffect(new ZoomBlurEffect());
-        }
-
-		private void HandleEffectUnfocusActivated(object sender, EventArgs e)
-        {
-            PintaCore.Actions.Adjustments.PerformEffect(new UnfocusEffect());
-        }
-
-		private void HandleEffectRadialBlurActivated (object sender, EventArgs e)
-		{
-			PintaCore.Actions.Adjustments.PerformEffect (new RadialBlurEffect ());
-		}
-
-		private void HandleEffectCloudsActivated (object sender, EventArgs e)
-		{
-			PintaCore.Actions.Adjustments.PerformEffect (new CloudsEffect ());	
-		}
-
-		private void HandleEffectMandelbrotFractalActivated (object sender, EventArgs e)
-		{
-			PintaCore.Actions.Adjustments.PerformEffect (new MandelbrotFractalEffect ());	
-		}
-
-		private void HandleEffectJuliaFractalActivated (object sender, EventArgs e)
-		{
-			PintaCore.Actions.Adjustments.PerformEffect (new JuliaFractalEffect ());	
-		}
-
-        private void HandleEffectAddNoiseActivated(object sender, EventArgs e)
-        {
-            PintaCore.Actions.Adjustments.PerformEffect(new AddNoiseEffect());
-        }
-
-        private void HandleEffectMedianActivated(object sender, EventArgs e)
-        {
-            PintaCore.Actions.Adjustments.PerformEffect(new MedianEffect());
-        }
-
-        private void HandleEffectReduceNoiseActivated(object sender, EventArgs e)
-        {
-            PintaCore.Actions.Adjustments.PerformEffect(new ReduceNoiseEffect());
-        }
-
-		private void HandleEffectOutlineActivated(object sender, EventArgs e)
-        {
-            PintaCore.Actions.Adjustments.PerformEffect(new OutlineEffect());
-        }
 
 		private void HandlePintaCoreActionsViewRulersToggled (object sender, EventArgs e)
 		{

@@ -2,9 +2,9 @@
 // CloudsEffect.cs
 //  
 // Author:
-//       dufoli <${AuthorEmail}>
+//       Olivier Dufour <olivier.duff@gmail.com>
 // 
-// Copyright (c) 2010 dufoli
+// Copyright (c) 2010 Olivier Dufour
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -48,27 +48,16 @@ namespace Pinta.Core
 			get { return true; }
 		}
 
-		public CloudsData Data { get; private set; }
+		public CloudsData Data { get { return EffectData as CloudsData; } }
 
 		public CloudsEffect ()
 		{
-			Data = new CloudsData ();
+			EffectData = new CloudsData ();
 		}
 
 		public override bool LaunchConfiguration ()
 		{
-			SimpleEffectDialog dialog = new SimpleEffectDialog (Text, PintaCore.Resources.GetIcon (Icon), Data);
-
-			int response = dialog.Run ();
-
-			if (response == (int)Gtk.ResponseType.Ok) {
-				dialog.Destroy ();
-				return !Data.IsEmpty;
-			}
-
-			dialog.Destroy ();
-
-			return false;
+			return EffectHelper.LaunchSimpleEffectDialog (this);
 		}
 
 		#region Algorithm Code Ported From PDN
@@ -196,7 +185,7 @@ namespace Pinta.Core
 		{
 			RenderClouds(dst, roi, Data.Scale, (byte)(Data.Seed ^ instanceSeed), 
 				Data.Power/100.0, PintaCore.Palette.PrimaryColor.ToColorBgra (), PintaCore.Palette.SecondaryColor.ToColorBgra ());
-			Type blendOpType = (Type)CloudsData.BlendOps[Data.BlendOp];
+			Type blendOpType = (Type)CloudsData.BlendOps[Data.BlendMode];
 			var blendOp = UserBlendOps.CreateBlendOp(blendOpType);
 			if (blendOp != null)
 			{
@@ -205,10 +194,10 @@ namespace Pinta.Core
 		}
 		#endregion
 
-		public class CloudsData
+		public class CloudsData : EffectData
 		{
 			[Skip]
-			public bool IsEmpty { get { return Power == 0; } }
+			public override bool IsDefault { get { return Power == 0; } }
 
 			[MinimumValue (2), MaximumValue (1000)]
 			public int Scale = 250;
@@ -236,7 +225,7 @@ namespace Pinta.Core
 			}
 			
 			[StaticList ("BlendOps")]
-			public string BlendOp = defaultBlendOp;
+			public string BlendMode = defaultBlendOp;
 			
 			[MinimumValue (0), MaximumValue (255)]
 			public int Seed = 0;

@@ -2,9 +2,9 @@
 // GradientTool.cs
 //  
 // Author:
-//       dufoli <${AuthorEmail}>
+//       Olivier Dufour <olivier.duff@gmail.com>
 // 
-// Copyright (c) 2010 dufoli
+// Copyright (c) 2010 Olivier Dufour
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +58,10 @@ namespace Pinta.Core
 		public override string Icon {
 			get { return "Tools.Gradient.png"; }
 		}
-
+		
+		public override Gdk.Key ShortcutKey { get { return Gdk.Key.G; } }
+		protected override bool ShowAlphaBlendingButton { get { return true; } }
+		
 		#region mouse
 		protected override void OnMouseDown (Gtk.DrawingArea canvas, Gtk.ButtonPressEventArgs args, Cairo.PointD point)
 		{
@@ -111,7 +114,7 @@ namespace Pinta.Core
 						
 	            gr.StartPoint = startpoint;
 	            gr.EndPoint = point;
-				gr.AlphaBlending = AlphaBlending;
+				gr.AlphaBlending = UseAlphaBlending;
         
 				gr.BeforeRender ();
 				gr.Render (PintaCore.Layers.CurrentLayer.Surface, new Gdk.Rectangle[] {PintaCore.Layers.SelectionPath.GetBounds ()});
