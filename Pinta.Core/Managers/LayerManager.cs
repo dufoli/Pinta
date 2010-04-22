@@ -585,7 +585,7 @@ namespace Pinta.Core
 		public void Save (DocumentManager.DocumentData doc)
 		{
 			doc.current_layer = current_layer;
-			doc.layers = layers;
+			doc.layers = new List<Layer> (layers);//clone it because clear do not create a new one
 			doc.selection_path = selection_path;
 			doc.show_selection = ShowSelection;
 		}
