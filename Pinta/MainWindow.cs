@@ -565,8 +565,8 @@ namespace Pinta
 				PintaCore.Layers.Clear (false);
 				PintaCore.History.Clear (false);
 				
-				PintaCore.Workspace.ImageSize = new Cairo.Point (bg.Width, bg.Height);
-				PintaCore.Workspace.CanvasSize = new Cairo.Point (bg.Width, bg.Height);
+				PintaCore.Workspace.ImageSize = new Size (bg.Width, bg.Height);
+				PintaCore.Workspace.CanvasSize = new Size (bg.Width, bg.Height);
 
 				PintaCore.Layers.ResetSelectionPath (false);
 

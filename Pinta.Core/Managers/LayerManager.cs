@@ -596,6 +596,7 @@ namespace Pinta.Core
 			current_layer = doc.current_layer;
 			selection_path = doc.selection_path;
 			ShowSelection = doc.show_selection;
+			RaiseLayerPropertyChangedEvent (null, null);
 		}
 	}
 }

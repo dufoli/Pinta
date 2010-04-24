@@ -43,7 +43,6 @@ namespace Pinta.Core
 			public bool show_selection;
 			public List<BaseHistoryItem> history;
 			public int historyPointer;
-			public Gtk.ListStore ListStore;
 		}
 		
 		private List<DocumentData> docs;

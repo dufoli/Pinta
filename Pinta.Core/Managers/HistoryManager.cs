@@ -193,15 +193,18 @@ namespace Pinta.Core
 		{
 			doc.history = new List<BaseHistoryItem> (history);//clone because clear do not instanciate a new list
 			doc.historyPointer = historyPointer;
-			doc.ListStore = new ListStore (typeof (BaseHistoryItem));
-			doc.ListStore.AppendValues(ListStore);//clone because clear do not instanciate a new list
 		}
 		
 		public void Restore (DocumentManager.DocumentData doc)
 		{
 			history = doc.history;
 			historyPointer = doc.historyPointer;
-			ListStore = doc.ListStore;
+			
+			ListStore.Clear ();
+			foreach (BaseHistoryItem item in history) {
+				
+				item.Id = ListStore.AppendValues (item);
+			}
 		}
 	}
 }
