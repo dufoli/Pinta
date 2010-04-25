@@ -65,7 +65,7 @@ namespace Pinta {
         
         private Gtk.Table table1;
         
-        private Gtk.DrawingArea drawingarea1;
+        private Pinta.Gui.Widgets.PintaCanvas drawingarea1;
         
         private Gtk.VBox vbox2;
         
@@ -269,8 +269,8 @@ namespace Pinta {
             this.table1.RowSpacing = ((uint)(2));
             this.table1.ColumnSpacing = ((uint)(2));
             // Container child table1.Gtk.Table+TableChild
-	    this.drawingarea1 = new Pinta.Gui.Widgets.PintaCanvas ();
-	    this.drawingarea1.CanDefault = true;
+            this.drawingarea1 = new Pinta.Gui.Widgets.PintaCanvas();
+            this.drawingarea1.CanDefault = true;
             this.drawingarea1.CanFocus = true;
             this.drawingarea1.Events = ((Gdk.EventMask)(16134));
             this.drawingarea1.Name = "drawingarea1";
