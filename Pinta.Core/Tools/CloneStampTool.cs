@@ -235,7 +235,8 @@ namespace Pinta.Core
 
 					saveMeRegion = Utility.RectanglesToRegion(rectsRO);
 
-					Region simplifiedRegion = Utility.SimplifyAndInflateRegion (saveMeRegion);
+					//Region simplifiedRegion = Utility.SimplifyAndInflateRegion (saveMeRegion);
+					Region simplifiedRegion = saveMeRegion;
 					//SaveRegion (simplifiedRegion, simplifiedRegion.GetBoundsInt ());
 
 					historyRects = new List<Rectangle> ();
@@ -312,9 +313,10 @@ namespace Pinta.Core
 			double length = direction.Magnitude ();
 			double bw = 1 + BrushWidth / 2.0;
 
-			rectSelRegions = this.clipRegion.GetRegionScansReadOnlyInt ();
+			//rectSelRegions = this.clipRegion.GetRegionScansReadOnlyInt ();
+			rectSelRegions = this.clipRegion.GetRectangles ();
 
-			Rectangle rect = Utility.PointsToRectangle (lastMoved, currentMouse);
+			Rectangle rect = Utility.PointsToRectangle (lastMoved, currentMouse, false).ToGdkRectangle ();
 			rect.Inflate (BrushWidth / 2 + 1, BrushWidth / 2 + 1);
 			rect.Intersect (new Rectangle (difference, new Size (surfaceSource.Width, surfaceSource.Height)));
 			rect.Intersect (surfaceDest.GetBounds ());
@@ -428,7 +430,7 @@ namespace Pinta.Core
 				}
 
 				if (this.clipRegion == null) {
-					this.clipRegion = Selection.CreateRegion ();
+					this.clipRegion = Region.Rectangle (PintaCore.Layers.SelectionPath.GetBounds ());
 				}
 
 				DrawCloneLine (point, Data.lastMoved, lastTakeFrom, takeFromSurface, PintaCore.Layers.CurrentLayer.Surface);

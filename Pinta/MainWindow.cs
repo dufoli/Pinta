@@ -47,7 +47,7 @@ namespace Pinta
 			
 			progress_dialog = new ProgressDialog ();
 			
-			PintaCore.Initialize (tooltoolbar, label5, drawingarea1, history_treeview, this, progress_dialog, (Gtk.Viewport)table1.Parent);
+			PintaCore.Initialize (tooltoolbar, label5, drawingarea1, history_treeview, this, progress_dialog, MainViewport);
 			colorpalettewidget1.Initialize ();
 			
 			PintaCore.Chrome.StatusBarTextChanged += new EventHandler<TextChangedEventArgs> (Chrome_StatusBarTextChanged);
@@ -122,7 +122,21 @@ namespace Pinta
 			vruler = new VRuler ();
 			vruler.Metric = MetricType.Pixels;
 			table1.Attach (vruler, 0, 1, 1, 2, AttachOptions.Shrink | AttachOptions.Fill, AttachOptions.Shrink | AttachOptions.Fill, 0, 0);
-			
+			GtkScrolledWindow.Events = EventMask.AllEventsMask;
+			GtkScrolledWindow.ScrollChild += delegate {
+				UpdateRulerRange ();
+			};
+			/*GtkScrolledWindow.Hadjustment.Changed += delegate {
+				UpdateRulerRange ();
+			};
+			GtkScrolledWindow.Vadjustment.Changed += delegate {
+				UpdateRulerRange ();
+			};*/
+
+			MainViewport.Events = Gdk.EventMask.AllEventsMask;
+			MainViewport.ScrollAdjustmentsSet += delegate {
+				UpdateRulerRange ();
+			};
 			UpdateRulerRange ();
 			
 			PintaCore.Actions.View.ZoomComboBox.ComboBox.Changed += HandlePintaCoreActionsViewZoomComboBoxComboBoxChanged;
@@ -148,6 +162,11 @@ namespace Pinta
 					// If things don't work out, just use a normal menu.
 				}
 			}
+		}
+
+		protected Viewport MainViewport
+		{
+			get {return (Viewport)drawingarea1.Parent;}
 		}
 
 		private void MainWindow_DeleteEvent (object o, DeleteEventArgs args)
@@ -405,22 +424,42 @@ namespace Pinta
 
 		void HandlePintaCoreActionsViewZoomComboBoxComboBoxChanged (object sender, EventArgs e)
 		{
-			Gtk.Main.Iteration (); //Force update of scrollbar upper before recenter
 			UpdateRulerRange ();
 		}
 
 		void UpdateRulerRange ()
 		{
-			Cairo.PointD p = new Cairo.PointD (0, 0);
-			if (PintaCore.Workspace.Offset.X > 0)
-				p.X = PintaCore.Workspace.Offset.X /PintaCore.Workspace.Scale;
-			
-			if (PintaCore.Workspace.Offset.Y > 0)
-				p.Y = PintaCore.Workspace.Offset.Y;
-			
-			hruler.SetRange (-p.X, PintaCore.Workspace.ImageSize.Width + p.X, 0, PintaCore.Workspace.ImageSize.Width + p.X);
-			vruler.SetRange (-p.Y, PintaCore.Workspace.ImageSize.Height + p.Y, 0, PintaCore.Workspace.ImageSize.Height + p.Y);
+			Gtk.Main.Iteration (); //Force update of scrollbar upper before recenter
+
+			Cairo.PointD lower = new Cairo.PointD (0, 0);
+			Cairo.PointD upper = new Cairo.PointD (0, 0);
+
+			if (PintaCore.Workspace.Offset.X > 0) {
+				lower.X = - PintaCore.Workspace.Offset.X / PintaCore.Workspace.Scale;
+				upper.X = PintaCore.Workspace.ImageSize.Width - lower.X;
+			}
+			else {
+				lower.X = GtkScrolledWindow.Hadjustment.Value;
+				upper.X = GtkScrolledWindow.Hadjustment.Value + GtkScrolledWindow.Hadjustment.PageSize;
+			}
+			if (PintaCore.Workspace.Offset.Y > 0) {
+				lower.Y = - PintaCore.Workspace.Offset.Y / PintaCore.Workspace.Scale;
+				upper.Y = PintaCore.Workspace.ImageSize.Height - lower.Y;
+			}
+			else {
+				lower.Y = GtkScrolledWindow.Vadjustment.Value;
+				upper.Y = GtkScrolledWindow.Vadjustment.Value + GtkScrolledWindow.Vadjustment.PageSize;
+			}
+
+			hruler.SetRange (lower.X, upper.X, 0, upper.X);
+			vruler.SetRange (lower.Y, upper.Y, 0, upper.Y);
 		}
 		#endregion
+		protected virtual void HandleScroll (object o, Gtk.ScrollChildArgs args)
+		{
+			UpdateRulerRange ();
+		}
+		
+		
 	}
 }

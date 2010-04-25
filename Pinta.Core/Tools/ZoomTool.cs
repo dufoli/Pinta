@@ -71,7 +71,7 @@ namespace Pinta.Core
 			if (!is_drawing)
 				return;
 
-			Rectangle r = PointsToRectangle (shape_origin, point);
+			Rectangle r = Utility.PointsToRectangle (shape_origin, point, false);
 			Rectangle dirty;
 
 			PintaCore.Layers.ToolLayer.Clear ();
@@ -138,7 +138,7 @@ namespace Pinta.Core
 						PintaCore.Workspace.ZoomIn ();
 						PintaCore.Workspace.RecenterView (x, y);
 					} else {
-						PintaCore.Workspace.ZoomToRectangle (PointsToRectangle (shape_origin, point));
+						PintaCore.Workspace.ZoomToRectangle (Utility.PointsToRectangle (shape_origin, point, false));
 					}
 				} else {
 					PintaCore.Workspace.ZoomOut ();
@@ -150,29 +150,6 @@ namespace Pinta.Core
 			
 			is_drawing = false;
 			SetCursor (cursorZoom);//restore regular cursor
-		}
-
-		Rectangle PointsToRectangle (Cairo.PointD p1, Cairo.PointD p2)
-		{
-			double x, y, w, h;
-
-			if (p1.Y <= p2.Y) {
-				y = p1.Y;
-				h = p2.Y - y;
-			} else {
-				y = p2.Y;
-				h = p1.Y - y;
-			}
-
-			if (p1.X <= p2.X) {
-				x = p1.X;
-				w = p2.X - x;
-			} else {
-				x = p2.X;
-				w = p1.X - x;
-			}
-
-			return new Rectangle (x, y, w, h);
 		}
 	}
 }
