@@ -41,11 +41,6 @@ namespace Pinta
 		{
 			Build ();
 			
-			Requisition req = new Requisition ();
-			req.Height = 600;
-			req.Width = 800;
-			drawingarea1.Requisition = req;
-			
 			// Initialize interface things
 			PintaCore.Actions.AccelGroup = new AccelGroup ();
 			this.AddAccelGroup (PintaCore.Actions.AccelGroup);
@@ -56,8 +51,6 @@ namespace Pinta
 			colorpalettewidget1.Initialize ();
 			
 			PintaCore.Chrome.StatusBarTextChanged += new EventHandler<TextChangedEventArgs> (Chrome_StatusBarTextChanged);
-			PintaCore.Workspace.CanvasInvalidated += new EventHandler<CanvasInvalidatedEventArgs> (Workspace_CanvasInvalidated);
-			PintaCore.Workspace.CanvasSizeChanged += new EventHandler (Workspace_CanvasSizeChanged);
 			CreateToolBox ();
 			
 			PintaCore.Actions.CreateMainMenu (menubar1);
@@ -134,15 +127,13 @@ namespace Pinta
 			
 			PintaCore.Actions.View.ZoomComboBox.ComboBox.Changed += HandlePintaCoreActionsViewZoomComboBoxComboBoxChanged;
 			
-			gr = new GridRenderer (cr);
-			
 			tabstrip1.Changed += HandleTabstrip1Changed;
 			tabstrip1.AddThumbnail (PintaCore.Layers.GetFlattenedImage ());
 			PintaCore.Documents.Save (0);
 			PintaCore.Chrome.DrawingArea.ExposeEvent += delegate {
 				tabstrip1.UpdateCurrentThumbnail ();
 			};
-			
+
 			if (Platform.GetOS () == Platform.OS.Mac) {
 				try {
 					//enable the global key handler for keyboard shortcuts
@@ -174,16 +165,6 @@ namespace Pinta
 			PintaCore.Actions.File.Exit.Activate ();
 		}
 
-		private void Workspace_CanvasSizeChanged (object sender, EventArgs e)
-		{
-			Requisition req = new Requisition ();
-			req.Height = PintaCore.Workspace.CanvasSize.Height;
-			req.Width = PintaCore.Workspace.CanvasSize.Width;
-			drawingarea1.Requisition = req;
-			
-			drawingarea1.QueueResize ();
-		}
-
 		private void ZoomToWindow_Activated (object sender, EventArgs e)
 		{
 			// The image is small enough to fit in the window
@@ -212,14 +193,6 @@ namespace Pinta
 				(PintaCore.Actions.View.ZoomComboBox.ComboBox as ComboBoxEntry).Entry.Text = string.Format ("{0}%", (int)(PintaCore.Workspace.Scale * 100));
 				PintaCore.Actions.View.ResumeZoomUpdate ();
 			}
-		}
-
-		void Workspace_CanvasInvalidated (object sender, CanvasInvalidatedEventArgs e)
-		{
-			if (e.EntireSurface)
-				drawingarea1.GdkWindow.Invalidate ();
-			else
-				drawingarea1.GdkWindow.InvalidateRect (e.Rectangle, false);
 		}
 
 		private void Chrome_StatusBarTextChanged (object sender, TextChangedEventArgs e)
@@ -358,103 +331,6 @@ namespace Pinta
 		}
 
 		#region Drawing Area
-		Cairo.ImageSurface canvas;
-		Cairo.ImageSurface composite;
-		CanvasRenderer cr = new CanvasRenderer ();
-		GridRenderer gr;
-
-		private void OnDrawingarea1ExposeEvent (object o, Gtk.ExposeEventArgs args)
-		{
-			double scale = PintaCore.Workspace.Scale;
-			
-			int x = (int)PintaCore.Workspace.Offset.X;
-			int y = (int)PintaCore.Workspace.Offset.Y;
-			
-			// Translate our expose area for the whole drawingarea to just our canvas
-			Rectangle canvas_bounds = new Rectangle (x, y, PintaCore.Workspace.CanvasSize.Width, PintaCore.Workspace.CanvasSize.Height);
-			canvas_bounds.Intersect (args.Event.Area);
-			
-			if (canvas_bounds.IsEmpty)
-				return;
-			
-			canvas_bounds.X -= x;
-			canvas_bounds.Y -= y;
-			
-			// Resize our offscreen surface to a surface the size of our drawing area
-			if (canvas == null || canvas.Width != canvas_bounds.Width || canvas.Height != canvas_bounds.Height) {
-				if (canvas != null)
-					(canvas as IDisposable).Dispose ();
-				
-				canvas = new Cairo.ImageSurface (Cairo.Format.Argb32, canvas_bounds.Width, canvas_bounds.Height);
-			}
-			
-			cr.Initialize (PintaCore.Workspace.ImageSize, PintaCore.Workspace.CanvasSize);
-			
-			using (Cairo.Context g = CairoHelper.Create (drawingarea1.GdkWindow)) {
-				// Draw our 1 px black border
-				g.DrawRectangle (new Cairo.Rectangle (x, y, PintaCore.Workspace.CanvasSize.Width + 1, PintaCore.Workspace.CanvasSize.Height + 1), new Cairo.Color (0, 0, 0), 1);
-				
-				// Set up our clip rectangle
-				g.Rectangle (new Cairo.Rectangle (x, y, PintaCore.Workspace.CanvasSize.Width, PintaCore.Workspace.CanvasSize.Height));
-				g.Clip ();
-				
-				g.Translate (x, y);
-				
-				bool checker = true;
-				
-				// Resize each layer and paint it to the screen
-				foreach (Layer layer in PintaCore.Layers.GetLayersToPaint ()) {
-					cr.Render (layer.Surface, canvas, canvas_bounds.Location, checker);
-					g.SetSourceSurface (canvas, canvas_bounds.X, canvas_bounds.Y);
-					g.PaintWithAlpha (layer.Opacity);
-					
-					if (layer == PintaCore.Layers.CurrentLayer && PintaCore.LivePreview.IsEnabled) {
-						cr.Render (PintaCore.LivePreview.LivePreviewSurface, canvas, canvas_bounds.Location, checker);
-						
-						g.Save ();
-						g.Scale (scale, scale);
-						g.AppendPath (PintaCore.Layers.SelectionPath);
-						g.Clip ();
-						
-						g.Scale (1 / scale, 1 / scale);
-						g.SetSourceSurface (canvas, canvas_bounds.X, canvas_bounds.Y);
-						g.PaintWithAlpha (layer.Opacity);
-						
-						g.Restore ();
-					}
-					
-					checker = false;
-				}
-				if (PintaCore.Actions.View.PixelGrid.Active) {
-					gr.Render (canvas, canvas_bounds.Location);
-					g.SetSourceSurface (canvas, canvas_bounds.X, canvas_bounds.Y);
-					g.Paint ();					
-				}
-
-				// Selection outline
-				if (PintaCore.Layers.ShowSelection) {
-					g.Save ();
-					g.Translate (0.5, 0.5);
-					g.Scale (scale, scale);
-					
-					g.AppendPath (PintaCore.Layers.SelectionPath);
-					
-					if (PintaCore.Tools.CurrentTool.Name.Contains ("Select") && !PintaCore.Tools.CurrentTool.Name.Contains ("Selected")) {
-						g.Color = new Cairo.Color (0.7, 0.8, 0.9, 0.2);
-						g.FillRule = Cairo.FillRule.EvenOdd;
-						g.FillPreserve ();
-					}
-					
-					g.SetDash (new double[] { 2 / scale, 4 / scale }, 0);
-					g.LineWidth = 1 / scale;
-					g.Color = new Cairo.Color (0, 0, 0);
-					
-					g.Stroke ();
-					g.Restore ();
-				}
-			}
-		}
-
 		private void OnDrawingarea1MotionNotifyEvent (object o, Gtk.MotionNotifyEventArgs args)
 		{
 			Cairo.PointD point = PintaCore.Workspace.WindowPointToCanvas (args.Event.X, args.Event.Y);

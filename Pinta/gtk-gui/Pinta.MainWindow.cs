@@ -269,8 +269,8 @@ namespace Pinta {
             this.table1.RowSpacing = ((uint)(2));
             this.table1.ColumnSpacing = ((uint)(2));
             // Container child table1.Gtk.Table+TableChild
-            this.drawingarea1 = new Gtk.DrawingArea();
-            this.drawingarea1.CanDefault = true;
+	    this.drawingarea1 = new Pinta.Gui.Widgets.PintaCanvas ();
+	    this.drawingarea1.CanDefault = true;
             this.drawingarea1.CanFocus = true;
             this.drawingarea1.Events = ((Gdk.EventMask)(16134));
             this.drawingarea1.Name = "drawingarea1";
@@ -390,7 +390,6 @@ namespace Pinta {
             this.drawingarea1.ButtonPressEvent += new Gtk.ButtonPressEventHandler(this.OnDrawingarea1ButtonPressEvent);
             this.drawingarea1.ButtonReleaseEvent += new Gtk.ButtonReleaseEventHandler(this.OnDrawingarea1ButtonReleaseEvent);
             this.drawingarea1.MotionNotifyEvent += new Gtk.MotionNotifyEventHandler(this.OnDrawingarea1MotionNotifyEvent);
-            this.drawingarea1.ExposeEvent += new Gtk.ExposeEventHandler(this.OnDrawingarea1ExposeEvent);
             this.drawingarea1.KeyPressEvent += new Gtk.KeyPressEventHandler(this.OnDrawingarea1KeyPressEvent);
             this.drawingarea1.KeyReleaseEvent += new Gtk.KeyReleaseEventHandler(this.OnDrawingarea1KeyReleaseEvent);
         }
