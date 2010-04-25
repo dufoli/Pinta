@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -135,7 +135,6 @@
     <Compile Include="Tools\SelectTool.cs" />
     <Compile Include="Tools\ShapeTool.cs" />
     <Compile Include="Tools\TextTool.cs" />
-    <Compile Include="Tools\UnimplementedTools.cs" />
     <Compile Include="Tools\ZoomTool.cs" />
     <Compile Include="Extensions\ToolBarToggleButton.cs" />
     <Compile Include="HistoryItems\UpdateLayerPropertiesHistoryItem.cs" />
@@ -161,6 +160,7 @@
     <Compile Include="Tools\GradientTool.cs" />
     <Compile Include="Classes\GradientRenderer.cs" />
     <Compile Include="Classes\GradientRenderers.cs" />
+    <Compile Include="Tools\CloneStampTool.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
