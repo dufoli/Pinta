@@ -1,4 +1,4 @@
-﻿// 
+// 
 // PintaCanvas.cs
 //  
 // Author:

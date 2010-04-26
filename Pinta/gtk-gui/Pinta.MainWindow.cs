@@ -241,7 +241,7 @@ namespace Pinta {
             this.drawingarea1 = new Pinta.Gui.Widgets.PintaCanvas();
             this.drawingarea1.CanDefault = true;
             this.drawingarea1.CanFocus = true;
-            this.drawingarea1.Events = ((Gdk.EventMask)(16134));
+            this.drawingarea1.Events = ((Gdk.EventMask)(2113286));
             this.drawingarea1.Name = "drawingarea1";
             w10.Add(this.drawingarea1);
             this.GtkScrolledWindow.Add(w10);

@@ -64,7 +64,7 @@ namespace Pinta.Core
 	public class WorkspaceManager
 	{
 		private Gdk.Size canvas_size;
-		private Gtk.Viewport viewport;
+		private Gtk.ScrolledWindow scrolledWindow;
 		
 		public Gdk.Size ImageSize { get; set; }
 
@@ -91,9 +91,9 @@ namespace Pinta.Core
 			ImageSize = new Gdk.Size (800, 600);
 		}
 
-		public void Initialize (Gtk.Viewport viewport)
+		public void Initialize (Gtk.ScrolledWindow scrolledWindow)
 		{
-			this.viewport = viewport;
+			this.scrolledWindow = scrolledWindow;
 		}
 
 		public double Scale {
@@ -181,8 +181,8 @@ namespace Pinta.Core
 		
 		public void RecenterView (double x, double y)
 		{
-			viewport.Hadjustment.Value = Utility.Clamp (x * Scale - viewport.Hadjustment.PageSize / 2 , viewport.Hadjustment.Lower, viewport.Hadjustment.Upper);
-			viewport.Vadjustment.Value = Utility.Clamp (y * Scale - viewport.Vadjustment.PageSize / 2  , viewport.Vadjustment.Lower, viewport.Vadjustment.Upper);
+			scrolledWindow.Hadjustment.Value = Utility.Clamp (x * Scale - scrolledWindow.Hadjustment.PageSize / 2 , scrolledWindow.Hadjustment.Lower, scrolledWindow.Hadjustment.Upper);
+			scrolledWindow.Vadjustment.Value = Utility.Clamp (y * Scale - scrolledWindow.Vadjustment.PageSize / 2  , scrolledWindow.Vadjustment.Lower, scrolledWindow.Vadjustment.Upper);
 		}
 		
 		public void ResizeImage (int width, int height)
@@ -310,8 +310,8 @@ namespace Pinta.Core
 		
 		public void ScrollCanvas (int dx, int dy)
 		{
-			viewport.Hadjustment.Value = Utility.Clamp (dx + viewport.Hadjustment.Value, viewport.Hadjustment.Lower, viewport.Hadjustment.Upper - viewport.Hadjustment.PageSize);
-			viewport.Vadjustment.Value = Utility.Clamp (dy + viewport.Vadjustment.Value, viewport.Vadjustment.Lower, viewport.Vadjustment.Upper - viewport.Vadjustment.PageSize);
+			scrolledWindow.Hadjustment.Value = Utility.Clamp (dx + scrolledWindow.Hadjustment.Value, scrolledWindow.Hadjustment.Lower, scrolledWindow.Hadjustment.Upper - scrolledWindow.Hadjustment.PageSize);
+			scrolledWindow.Vadjustment.Value = Utility.Clamp (dy + scrolledWindow.Vadjustment.Value, scrolledWindow.Vadjustment.Lower, scrolledWindow.Vadjustment.Upper - scrolledWindow.Vadjustment.PageSize);
 		}
 		
 		private void ResetTitle ()

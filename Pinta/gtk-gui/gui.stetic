@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <stetic-interface>
   <configuration>
     <images-root-path>..</images-root-path>
@@ -240,7 +240,7 @@
                                 <property name="CanDefault">True</property>
                                 <property name="HasDefault">True</property>
                                 <property name="CanFocus">True</property>
-                                <property name="Events">ExposureMask, PointerMotionMask, ButtonPressMask, ButtonReleaseMask, KeyPressMask, KeyReleaseMask, EnterNotifyMask, LeaveNotifyMask</property>
+                                <property name="Events">ExposureMask, PointerMotionMask, ButtonPressMask, ButtonReleaseMask, KeyPressMask, KeyReleaseMask, EnterNotifyMask, LeaveNotifyMask, ScrollMask</property>
                                 <signal name="MotionNotifyEvent" handler="OnDrawingarea1MotionNotifyEvent" />
                               </widget>
                             </child>

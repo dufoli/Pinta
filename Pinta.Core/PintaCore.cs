@@ -61,7 +61,7 @@ namespace Pinta.Core
 		                               TreeView historyStack,
 		                               Window mainWindow,
 		                               IProgressDialog progressDialog,
-		                               Viewport viewport)
+		                               Gtk.ScrolledWindow scrolledWindow)
 		{
 			Chrome = new ChromeManager ();
 			Chrome.Initialize (toolToolBar,
@@ -73,7 +73,7 @@ namespace Pinta.Core
 			
 			Palette = new PaletteManager ();
 			
-			Workspace.Initialize (viewport);
+			Workspace.Initialize (scrolledWindow);
 			
 			Actions.RegisterHandlers ();
 		}

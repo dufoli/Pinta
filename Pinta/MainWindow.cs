@@ -47,7 +47,7 @@ namespace Pinta
 			
 			progress_dialog = new ProgressDialog ();
 			
-			PintaCore.Initialize (tooltoolbar, label5, drawingarea1, history_treeview, this, progress_dialog, MainViewport);
+			PintaCore.Initialize (tooltoolbar, label5, drawingarea1, history_treeview, this, progress_dialog, GtkScrolledWindow);
 			colorpalettewidget1.Initialize ();
 			
 			PintaCore.Chrome.StatusBarTextChanged += new EventHandler<TextChangedEventArgs> (Chrome_StatusBarTextChanged);
@@ -122,21 +122,14 @@ namespace Pinta
 			vruler = new VRuler ();
 			vruler.Metric = MetricType.Pixels;
 			table1.Attach (vruler, 0, 1, 1, 2, AttachOptions.Shrink | AttachOptions.Fill, AttachOptions.Shrink | AttachOptions.Fill, 0, 0);
-			GtkScrolledWindow.Events = EventMask.AllEventsMask;
-			GtkScrolledWindow.ScrollChild += delegate {
-				UpdateRulerRange ();
-			};
-			/*GtkScrolledWindow.Hadjustment.Changed += delegate {
-				UpdateRulerRange ();
-			};
-			GtkScrolledWindow.Vadjustment.Changed += delegate {
-				UpdateRulerRange ();
-			};*/
 
-			MainViewport.Events = Gdk.EventMask.AllEventsMask;
-			MainViewport.ScrollAdjustmentsSet += delegate {
+			GtkScrolledWindow.Hadjustment.ValueChanged += delegate {
 				UpdateRulerRange ();
 			};
+			GtkScrolledWindow.Vadjustment.ValueChanged += delegate {
+				UpdateRulerRange ();
+			};
+
 			UpdateRulerRange ();
 			
 			PintaCore.Actions.View.ZoomComboBox.ComboBox.Changed += HandlePintaCoreActionsViewZoomComboBoxComboBoxChanged;
@@ -162,11 +155,6 @@ namespace Pinta
 					// If things don't work out, just use a normal menu.
 				}
 			}
-		}
-
-		protected Viewport MainViewport
-		{
-			get {return (Viewport)drawingarea1.Parent;}
 		}
 
 		private void MainWindow_DeleteEvent (object o, DeleteEventArgs args)
@@ -409,16 +397,16 @@ namespace Pinta
 				upper.X = PintaCore.Workspace.ImageSize.Width - lower.X;
 			}
 			else {
-				lower.X = GtkScrolledWindow.Hadjustment.Value;
-				upper.X = GtkScrolledWindow.Hadjustment.Value + GtkScrolledWindow.Hadjustment.PageSize;
+				lower.X = GtkScrolledWindow.Hadjustment.Value / PintaCore.Workspace.Scale;
+				upper.X = (GtkScrolledWindow.Hadjustment.Value + GtkScrolledWindow.Hadjustment.PageSize) / PintaCore.Workspace.Scale;
 			}
 			if (PintaCore.Workspace.Offset.Y > 0) {
 				lower.Y = - PintaCore.Workspace.Offset.Y / PintaCore.Workspace.Scale;
 				upper.Y = PintaCore.Workspace.ImageSize.Height - lower.Y;
 			}
 			else {
-				lower.Y = GtkScrolledWindow.Vadjustment.Value;
-				upper.Y = GtkScrolledWindow.Vadjustment.Value + GtkScrolledWindow.Vadjustment.PageSize;
+				lower.Y = GtkScrolledWindow.Vadjustment.Value / PintaCore.Workspace.Scale;
+				upper.Y = (GtkScrolledWindow.Vadjustment.Value + GtkScrolledWindow.Vadjustment.PageSize) / PintaCore.Workspace.Scale;
 			}
 
 			hruler.SetRange (lower.X, upper.X, 0, upper.X);
