@@ -81,6 +81,30 @@ namespace Pinta.Core
 		public PointD Offset {
 			get { return new PointD ((PintaCore.Chrome.DrawingArea.Allocation.Width - canvas_size.Width) / 2, (PintaCore.Chrome.DrawingArea.Allocation.Height - CanvasSize.Height) / 2); }
 		}
+
+		public Gdk.Rectangle ViewRectangle {
+			get {
+				Gdk.Rectangle rect  = new Gdk.Rectangle (0, 0, 0, 0);
+
+				if (PintaCore.Workspace.Offset.X > 0) {
+					rect.X = - (int)(PintaCore.Workspace.Offset.X / PintaCore.Workspace.Scale);
+					rect.Width = (int)(PintaCore.Workspace.ImageSize.Width / PintaCore.Workspace.Scale);
+				}
+				else {
+					rect.X = (int)(viewport.Hadjustment.Value / PintaCore.Workspace.Scale);
+					rect.Width = (int)((viewport.Hadjustment.PageSize) / PintaCore.Workspace.Scale);
+				}
+				if (PintaCore.Workspace.Offset.Y > 0) {
+					rect.Y = - (int)(PintaCore.Workspace.Offset.Y / PintaCore.Workspace.Scale);
+					rect.Height = (int)(PintaCore.Workspace.ImageSize.Height / PintaCore.Workspace.Scale);
+				}
+				else {
+					rect.Y = (int)(viewport.Vadjustment.Value / PintaCore.Workspace.Scale);
+					rect.Height = (int)((viewport.Vadjustment.PageSize) / PintaCore.Workspace.Scale);
+				}
+				return rect;
+			}
+		}
 		
 		public Document Document { get; set; }
 		

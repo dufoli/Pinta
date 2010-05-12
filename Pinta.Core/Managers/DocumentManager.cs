@@ -43,6 +43,8 @@ namespace Pinta.Core
 			public bool show_selection;
 			public List<BaseHistoryItem> history;
 			public int historyPointer;
+			public Gdk.Rectangle ViewRect;
+			public Gdk.Size ImageSize;
 		}
 		
 		private List<DocumentData> docs;
@@ -65,6 +67,8 @@ namespace Pinta.Core
 			
 			PintaCore.Layers.Save (doc);
 			PintaCore.History.Save (doc);
+			doc.ImageSize = PintaCore.Workspace.ImageSize;
+			doc.ViewRect = PintaCore.Workspace.ViewRectangle;
 		}
 
 		public void Restore (int index)
@@ -73,6 +77,8 @@ namespace Pinta.Core
 			
 			PintaCore.Layers.Restore (doc);
 			PintaCore.History.Restore (doc);
+			PintaCore.Workspace.ImageSize = doc.ImageSize;
+			PintaCore.Workspace.ZoomToRectangle(doc.ViewRect.ToCairoRectangle ());
 			PintaCore.Workspace.Invalidate ();
 		}
 
