@@ -49,22 +49,20 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Classes\Anchor.cs" />
     <Compile Include="Classes\ScaleFactor.cs" />
-    <Compile Include="Effects\AutoLevelEffect.cs" />
     <Compile Include="Effects\BaseEffect.cs" />
     <Compile Include="Effects\BinaryPixelOp.cs" />
     <Compile Include="Effects\BitVector2DSurfaceAdapter.cs" />
-    <Compile Include="Effects\BlackAndWhiteEffect.cs" />
     <Compile Include="Effects\Histogram.cs" />
     <Compile Include="Effects\HistogramRGB.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Effects\IBitVector2D.cs" />
-    <Compile Include="Effects\InvertColorsEffect.cs" />
     <Compile Include="Effects\Scanline.cs" />
-    <Compile Include="Effects\SepiaEffect.cs" />
     <Compile Include="Effects\UserBlendOp.cs" />
     <Compile Include="Effects\UserBlendOps.cs" />
     <Compile Include="Effects\UserBlendOps.Generated.cs" />
+    <Compile Include="Enumerations\EffectAdjustment.cs" />
+    <Compile Include="Enumerations\GradientColorMode.cs" />
     <Compile Include="EventArgs\CanvasInvalidatedEventArgs.cs" />
     <Compile Include="EventArgs\HistoryItemAddedEventArgs.cs" />
     <Compile Include="EventArgs\HistoryItemRemovedEventArgs.cs" />
@@ -86,6 +84,7 @@
     <Compile Include="Managers\HistoryManager.cs" />
     <Compile Include="Managers\LayerManager.cs" />
     <Compile Include="Managers\PaletteManager.cs" />
+    <Compile Include="Managers\ResourceManager.cs" />
     <Compile Include="Managers\SystemManager.cs" />
     <Compile Include="Managers\ToolManager.cs" />
     <Compile Include="Managers\WorkspaceManager.cs" />
@@ -112,37 +111,13 @@
     <Compile Include="Effects\Utility.cs" />
     <Compile Include="Effects\HsvColor.cs" />
     <Compile Include="Effects\RgbColor.cs" />
-    <Compile Include="Tools\BaseTool.cs" />
-    <Compile Include="Tools\BaseBrushTool.cs" />
-    <Compile Include="Tools\ColorPickerTool.cs" />
-    <Compile Include="Tools\RecolorTool.cs" />
-    <Compile Include="Tools\LineCurveTool.cs" />
-    <Compile Include="Tools\FloodTool.cs" />
-    <Compile Include="Tools\LassoSelectTool.cs" />
-    <Compile Include="Tools\PaintBucketTool.cs" />
-    <Compile Include="Tools\PanTool.cs" />
-    <Compile Include="Tools\PencilTool.cs" />
-    <Compile Include="Tools\EllipseSelectTool.cs" />
-    <Compile Include="Tools\EllipseTool.cs" />
-    <Compile Include="Tools\EraserTool.cs" />
-    <Compile Include="Tools\FreeformShapeTool.cs" />
-    <Compile Include="Tools\MoveSelectedTool.cs" />
-    <Compile Include="Tools\MoveSelectionTool.cs" />
-    <Compile Include="Tools\PaintBrushTool.cs" />
-    <Compile Include="Tools\RectangleSelectTool.cs" />
-    <Compile Include="Tools\RectangleTool.cs" />
-    <Compile Include="Tools\RoundedRectangleTool.cs" />
-    <Compile Include="Tools\SelectTool.cs" />
-    <Compile Include="Tools\ShapeTool.cs" />
-    <Compile Include="Tools\TextTool.cs" />
-    <Compile Include="Tools\ZoomTool.cs" />
+    <Compile Include="Classes\BaseTool.cs" />
     <Compile Include="Extensions\ToolBarToggleButton.cs" />
     <Compile Include="HistoryItems\UpdateLayerPropertiesHistoryItem.cs" />
     <Compile Include="Classes\ObservableObject.cs" />
     <Compile Include="Classes\LayerProperties.cs" />
     <Compile Include="Effects\ColorTransferMode.cs" />
     <Compile Include="Effects\SplineInterpolator.cs" />
-    <Compile Include="Tools\MagicWandTool.cs" />
     <Compile Include="Managers\PathManager.cs" />
     <Compile Include="Effects\IrregularSurface.cs" />
     <Compile Include="Effects\ISurfaceDraw.cs" />
@@ -157,10 +132,8 @@
     <Compile Include="EventArgs\LivePreviewStartedEventArgs.cs" />
     <Compile Include="Managers\LivePreviewManager.cs" />
     <Compile Include="Classes\AsyncEffectRenderer.cs" />
-    <Compile Include="Tools\GradientTool.cs" />
     <Compile Include="Classes\GradientRenderer.cs" />
     <Compile Include="Classes\GradientRenderers.cs" />
-    <Compile Include="Tools\CloneStampTool.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

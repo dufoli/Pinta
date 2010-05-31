@@ -53,27 +53,20 @@ namespace Pinta.Core
 			History = new HistoryManager ();
 			System = new SystemManager ();
 			LivePreview = new LivePreviewManager ();
+			Palette = new PaletteManager ();
 		}
 		
 		public static void Initialize (Toolbar toolToolBar,
-		                               Label statusTextLabel,
 		                               DrawingArea drawingArea,
-		                               TreeView historyStack,
 		                               Window mainWindow,
-		                               IProgressDialog progressDialog,
-		                               Gtk.ScrolledWindow scrolledWindow)
+		                               IProgressDialog progressDialog)
 		{
 			Chrome = new ChromeManager ();
 			Chrome.Initialize (toolToolBar,
-			                   statusTextLabel,
 			                   drawingArea,
-			                   historyStack,
 			                   mainWindow,
 			                   progressDialog);
 			
-			Palette = new PaletteManager ();
-			
-			Workspace.Initialize (scrolledWindow);
 			
 			Actions.RegisterHandlers ();
 		}

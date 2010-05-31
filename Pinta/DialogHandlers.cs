@@ -34,9 +34,9 @@ namespace Pinta
 {
 	public class DialogHandlers
 	{
-		private MainWindow main_window;
+		private Window main_window;
 
-		public DialogHandlers (MainWindow window)
+		public DialogHandlers (Window window)
 		{
 			main_window = window;
 			
@@ -46,50 +46,6 @@ namespace Pinta
 			PintaCore.Actions.Image.CanvasSize.Activated += HandlePintaCoreActionsImageCanvasSizeActivated;
 			
 			PintaCore.Actions.Layers.Properties.Activated += HandlePintaCoreActionsLayersPropertiesActivated;
-			
-			PintaCore.Actions.Adjustments.BrightnessContrast.Activated += HandleEffectActivated<BrightnessContrastEffect>;
-			PintaCore.Actions.Adjustments.Curves.Activated += HandleAdjustmentsCurvesActivated;
-			PintaCore.Actions.Adjustments.Levels.Activated += HandleAdjustmentsLevelsActivated;
-			PintaCore.Actions.Adjustments.Posterize.Activated += HandleEffectActivated <PosterizeEffect>;
-			PintaCore.Actions.Adjustments.HueSaturation.Activated += HandleEffectActivated<HueSaturationEffect>;
-			
-			PintaCore.Actions.Effects.InkSketch.Activated += HandleEffectActivated<InkSketchEffect>;
-			PintaCore.Actions.Effects.OilPainting.Activated += HandleEffectActivated<OilPaintingEffect>;
-			PintaCore.Actions.Effects.PencilSketch.Activated += HandleEffectActivated<PencilSketchEffect>;
-			PintaCore.Actions.Effects.Fragment.Activated += HandleEffectActivated<FragmentEffect>;
-			PintaCore.Actions.Effects.GaussianBlur.Activated += HandleEffectActivated<GaussianBlurEffect>;
-			PintaCore.Actions.Effects.SurfaceBlur.Activated += HandleEffectActivated<SurfaceBlurEffect>;
-			PintaCore.Actions.Effects.ZoomBlur.Activated += HandleEffectActivated<ZoomBlurEffect>;
-			PintaCore.Actions.Effects.Unfocus.Activated += HandleEffectActivated<UnfocusEffect>;
-			PintaCore.Actions.Effects.RadialBlur.Activated += HandleEffectActivated<RadialBlurEffect>;
-			PintaCore.Actions.Effects.Bulge.Activated += HandleEffectActivated <BulgeEffect>;
-			PintaCore.Actions.Effects.Dents.Activated += HandleEffectActivated <DentsEffect>;
-			PintaCore.Actions.Effects.PolarInversion.Activated += HandleEffectActivated <PolarInversionEffect>;
-			PintaCore.Actions.Effects.MotionBlur.Activated += HandleEffectActivated <MotionBlurEffect>;
-			PintaCore.Actions.Effects.Glow.Activated += HandleEffectActivated <GlowEffect>;
-			PintaCore.Actions.Effects.RedEyeRemove.Activated += HandleEffectActivated <RedEyeRemoveEffect>;
-			PintaCore.Actions.Effects.Sharpen.Activated += HandleEffectActivated <SharpenEffect>;
-			PintaCore.Actions.Effects.SoftenPortrait.Activated += HandleEffectActivated <SoftenPortraitEffect>;
-			PintaCore.Actions.Effects.Clouds.Activated += HandleEffectActivated<CloudsEffect>;
-			PintaCore.Actions.Effects.JuliaFractal.Activated += HandleEffectActivated<JuliaFractalEffect>;
-			PintaCore.Actions.Effects.MandelbrotFractal.Activated += HandleEffectActivated<MandelbrotFractalEffect>;
-			PintaCore.Actions.Effects.EdgeDetect.Activated += HandleEffectActivated <EdgeDetectEffect>;
-			PintaCore.Actions.Effects.Twist.Activated += HandleEffectActivated<TwistEffect>;
-			PintaCore.Actions.Effects.Tile.Activated += HandleEffectActivated<TileEffect>;
-			PintaCore.Actions.Effects.Pixelate.Activated += HandleEffectActivated<PixelateEffect>;
-			PintaCore.Actions.Effects.FrostedGlass.Activated += HandleEffectActivated<FrostedGlassEffect>;
-			PintaCore.Actions.Effects.Relief.Activated += HandleEffectActivated <ReliefEffect>;
-			PintaCore.Actions.Effects.Emboss.Activated += HandleEffectActivated<EmbossEffect>;
-			PintaCore.Actions.Effects.AddNoise.Activated += HandleEffectActivated<AddNoiseEffect>;
-			PintaCore.Actions.Effects.Median.Activated += HandleEffectActivated<MedianEffect>;
-			PintaCore.Actions.Effects.ReduceNoise.Activated += HandleEffectActivated<ReduceNoiseEffect>;
-			PintaCore.Actions.Effects.Outline.Activated += HandleEffectActivated<OutlineEffect>;
-			
-			PintaCore.Actions.View.Rulers.Toggled += HandlePintaCoreActionsViewRulersToggled;
-			PintaCore.Actions.View.Pixels.Activated += HandlePixelsActivated;
-			PintaCore.Actions.View.Inches.Activated += HandleInchesActivated;
-			PintaCore.Actions.View.Centimeters.Activated += HandleCentimetersActivated;
-			PintaCore.Actions.View.UnitComboBox.ComboBox.Changed += HandleUnitComboBoxComboBoxChanged;
 		}
 
 		#region Handlers
@@ -137,29 +93,8 @@ namespace Pinta
 
 			int response = dialog.Run ();
 
-			if (response == (int)Gtk.ResponseType.Ok) {
-				PintaCore.Workspace.ActiveDocument.HasFile = false;
-				PintaCore.Workspace.ImageSize = new Gdk.Size (dialog.NewImageWidth, dialog.NewImageHeight);
-				PintaCore.Workspace.CanvasSize = new Gdk.Size (dialog.NewImageWidth, dialog.NewImageHeight);
-				
-				PintaCore.Layers.Clear ();
-				PintaCore.History.Clear ();
-				PintaCore.Layers.DestroySelectionLayer ();
-				PintaCore.Layers.ResetSelectionPath ();
-
-				// Start with an empty white layer
-				Layer background = PintaCore.Layers.AddNewLayer ("Background");
-
-				using (Cairo.Context g = new Cairo.Context (background.Surface)) {
-					g.SetSourceRGB (255, 255, 255);
-					g.Paint ();
-				}
-
-				PintaCore.Workspace.Filename = "Untitled1";
-				PintaCore.History.PushNewItem (new BaseHistoryItem ("gtk-new", "New Image"));
-				PintaCore.Workspace.IsDirty = false;
-				PintaCore.Actions.View.ZoomToWindow.Activate ();
-			}
+			if (response == (int)Gtk.ResponseType.Ok)
+				PintaCore.Actions.File.NewFile (new Gdk.Size (dialog.NewImageWidth, dialog.NewImageHeight));
 
 			dialog.Destroy ();
 		}
@@ -259,63 +194,6 @@ namespace Pinta
 			
 			return ret;
 		}		
-		
-		private void HandleEffectActivated<T> (object sender, EventArgs e)
-			where T : BaseEffect, new ()
-		{
-			var effect = new T ();
-			PintaCore.LivePreview.Start (effect);
-		}
-		
-		private void HandleAdjustmentsCurvesActivated (object sender, EventArgs e)
-		{
-			PintaCore.Actions.Adjustments.PerformEffect (new CurvesEffect ());	
-		}
-
-		private void HandleAdjustmentsLevelsActivated (object sender, EventArgs e)
-		{
-			PintaCore.Actions.Adjustments.PerformEffect (new LevelsEffect ());
-		}
-
-		private void HandlePintaCoreActionsViewRulersToggled (object sender, EventArgs e)
-		{
-			if (((ToggleAction)sender).Active)
-				main_window.ShowRulers ();
-			else
-				main_window.HideRulers ();
-		}
-
-		private void HandleUnitComboBoxComboBoxChanged (object sender, EventArgs e)
-		{
-			switch (PintaCore.Actions.View.UnitComboBox.ComboBox.Active) {
-				case 0://pixels
-					main_window.ChangeRulersUnit (Gtk.MetricType.Pixels);
-				break;
-				case 1://inches
-					main_window.ChangeRulersUnit (Gtk.MetricType.Inches);
-				break;
-				case 2://centimeters
-					main_window.ChangeRulersUnit (Gtk.MetricType.Centimeters);
-				break;
-				
-			}
-		}
-
-		private void HandleCentimetersActivated (object sender, EventArgs e)
-		{
-			main_window.ChangeRulersUnit (Gtk.MetricType.Centimeters);
-		}
-
-		private void HandleInchesActivated (object sender, EventArgs e)
-		{
-			main_window.ChangeRulersUnit (Gtk.MetricType.Inches);
-		}
-
-		private void HandlePixelsActivated (object sender, EventArgs e)
-		{
-			main_window.ChangeRulersUnit (Gtk.MetricType.Pixels);
-		}
-
 		#endregion
 	}
 }

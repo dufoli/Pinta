@@ -31,7 +31,7 @@ namespace Pinta.Core
 {
 	public class ActionManager
 	{
-		public AccelGroup AccelGroup { get; set; }
+		public AccelGroup AccelGroup { get; private set; }
 		
 		public FileActions File { get; private set; }
 		public EditActions Edit { get; private set; }
@@ -44,6 +44,8 @@ namespace Pinta.Core
 		
 		public ActionManager ()
 		{
+			AccelGroup = new AccelGroup ();
+			
 			File = new FileActions ();
 			Edit = new EditActions ();
 			View = new ViewActions ();
@@ -58,34 +60,42 @@ namespace Pinta.Core
 		{
 			// File menu
 			ImageMenuItem file = (ImageMenuItem)menu.Children[0];
+			file.Submenu = new Menu ();
 			File.CreateMainMenu ((Menu)file.Submenu);
 			
 			//Edit menu
 			ImageMenuItem edit = (ImageMenuItem)menu.Children[1];
+			edit.Submenu = new Menu ();
 			Edit.CreateMainMenu ((Menu)edit.Submenu);
 			
 			// View menu
 			ImageMenuItem view = (ImageMenuItem)menu.Children[2];
+			view.Submenu = new Menu ();
 			View.CreateMainMenu ((Menu)view.Submenu);
 			
 			// Image menu
 			ImageMenuItem image = (ImageMenuItem)menu.Children[3];
+			image.Submenu = new Menu ();
 			Image.CreateMainMenu ((Menu)image.Submenu);
 			
 			//Layers menu
 			ImageMenuItem layer = (ImageMenuItem)menu.Children[4];
+			layer.Submenu = new Menu ();
 			Layers.CreateMainMenu ((Menu)layer.Submenu);
 			
 			//Adjustments menu
 			ImageMenuItem adj = (ImageMenuItem)menu.Children[5];
+			adj.Submenu = new Menu ();
 			Adjustments.CreateMainMenu ((Menu)adj.Submenu);
 
-			//Adjustments menu
+			// Effects menu
 			ImageMenuItem eff = (ImageMenuItem)menu.Children[6];
+			eff.Submenu = new Menu ();
 			Effects.CreateMainMenu ((Menu)eff.Submenu);
 			
 			//Help menu
 			ImageMenuItem help = (ImageMenuItem)menu.Children[8];
+			help.Submenu = new Menu ();
 			Help.CreateMainMenu ((Menu)help.Submenu);
 		}
 		
@@ -114,7 +124,6 @@ namespace Pinta.Core
 			Image.RegisterHandlers ();
 			Layers.RegisterHandlers ();
 			View.RegisterHandlers ();
-			Adjustments.RegisterHandlers ();
 			Help.RegisterHandlers ();
 		}
 	}

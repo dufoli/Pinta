@@ -78,8 +78,6 @@ namespace Pinta.Core
 		#region Initialization
 		public void CreateMainMenu (Gtk.Menu menu)
 		{
-			menu.Remove (menu.Children[1]);
-			
 			menu.Append (ZoomIn.CreateAcceleratedMenuItem (Gdk.Key.plus, Gdk.ModifierType.ControlMask));
 			menu.Append (ZoomOut.CreateAcceleratedMenuItem (Gdk.Key.minus, Gdk.ModifierType.ControlMask));
 			menu.Append (ZoomToWindow.CreateAcceleratedMenuItem (Gdk.Key.B, Gdk.ModifierType.ControlMask));
@@ -87,11 +85,12 @@ namespace Pinta.Core
 			menu.Append (ActualSize.CreateAcceleratedMenuItem (Gdk.Key.A, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask));
 			menu.AppendSeparator ();
 			menu.Append (PixelGrid.CreateMenuItem ());
-			menu.Append (Rulers.CreateMenuItem ());
-			menu.AppendSeparator ();
-			menu.Append (Pixels.CreateMenuItem ());
-			menu.Append (Inches.CreateMenuItem ());
-			menu.Append (Centimeters.CreateMenuItem ());
+			menu.Append (Fullscreen.CreateAcceleratedMenuItem (Gdk.Key.F11, Gdk.ModifierType.None));
+			//menu.Append (Rulers.CreateMenuItem ());
+			//menu.AppendSeparator ();
+			//menu.Append (Pixels.CreateMenuItem ());
+			//menu.Append (Inches.CreateMenuItem ());
+			//menu.Append (Centimeters.CreateMenuItem ());
 		}
 		
 		public void CreateToolBar (Gtk.Toolbar toolbar)
@@ -102,9 +101,9 @@ namespace Pinta.Core
 			toolbar.AppendItem (ZoomIn.CreateToolBarItem ());
 			toolbar.AppendItem (new Gtk.SeparatorToolItem ());
 			toolbar.AppendItem (PixelGrid.CreateToolBarItem ());
-			toolbar.AppendItem (Rulers.CreateToolBarItem ());
-			toolbar.AppendItem (new ToolBarLabel (" Units:  "));
-			toolbar.AppendItem (UnitComboBox);
+			//toolbar.AppendItem (Rulers.CreateToolBarItem ());
+			//toolbar.AppendItem (new ToolBarLabel (" Units:  "));
+			//toolbar.AppendItem (UnitComboBox);
 		}
 		
 		public void RegisterHandlers ()
@@ -120,7 +119,7 @@ namespace Pinta.Core
 				PintaCore.Workspace.Invalidate ();
 			};
 
-			var isFullscreen = false;
+			var isFullscreen = true;
 
 			Fullscreen.Activated += (foo, bar) => {
 				if (!isFullscreen) {

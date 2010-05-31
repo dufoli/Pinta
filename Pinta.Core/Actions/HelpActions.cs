@@ -51,8 +51,6 @@ namespace Pinta.Core
 		#region Initialization
 		public void CreateMainMenu (Gtk.Menu menu)
 		{
-			menu.Remove (menu.Children[1]);
-			
 			menu.Append (Website.CreateMenuItem ());
 			menu.Append (Bugs.CreateMenuItem ());
 			menu.AppendSeparator ();
@@ -71,7 +69,7 @@ namespace Pinta.Core
 			Gtk.AboutDialog dialog = new Gtk.AboutDialog ();
 
 			dialog.Icon = PintaCore.Resources.GetIcon ("Pinta.png");
-			dialog.Version = "0.2";
+			dialog.Version = "0.3";
 			dialog.ProgramName = "Pinta";
 			dialog.Website = "http://www.pinta-project.com";
 			dialog.WebsiteLabel = "Visit Homepage";

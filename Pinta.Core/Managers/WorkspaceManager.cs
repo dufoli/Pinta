@@ -64,7 +64,6 @@ namespace Pinta.Core
 	public class WorkspaceManager
 	{
 		private Gdk.Size canvas_size;
-		private Gtk.ScrolledWindow scrolledWindow;
 		
 		public Gdk.Size ImageSize { get; set; }
 
@@ -90,12 +89,7 @@ namespace Pinta.Core
 			CanvasSize = new Gdk.Size (800, 600);
 			ImageSize = new Gdk.Size (800, 600);
 		}
-
-		public void Initialize (Gtk.ScrolledWindow scrolledWindow)
-		{
-			this.scrolledWindow = scrolledWindow;
-		}
-
+		
 		public double Scale {
 			get { return (double)CanvasSize.Width / (double)ImageSize.Width; }
 			set {
@@ -181,8 +175,10 @@ namespace Pinta.Core
 		
 		public void RecenterView (double x, double y)
 		{
-			scrolledWindow.Hadjustment.Value = Utility.Clamp (x * Scale - scrolledWindow.Hadjustment.PageSize / 2 , scrolledWindow.Hadjustment.Lower, scrolledWindow.Hadjustment.Upper);
-			scrolledWindow.Vadjustment.Value = Utility.Clamp (y * Scale - scrolledWindow.Vadjustment.PageSize / 2  , scrolledWindow.Vadjustment.Lower, scrolledWindow.Vadjustment.Upper);
+			Gtk.Viewport view = (Gtk.Viewport)PintaCore.Chrome.DrawingArea.Parent;
+
+			view.Hadjustment.Value = Utility.Clamp (x * Scale - view.Hadjustment.PageSize / 2 , view.Hadjustment.Lower, view.Hadjustment.Upper);
+			view.Vadjustment.Value = Utility.Clamp (y * Scale - view.Vadjustment.PageSize / 2  , view.Vadjustment.Lower, view.Vadjustment.Upper);
 		}
 		
 		public void ResizeImage (int width, int height)
@@ -286,8 +282,10 @@ namespace Pinta.Core
 		
 		public bool CanvasFitsInWindow {
 			get {
-				int window_x = PintaCore.Chrome.DrawingArea.Allocation.Width;
-				int window_y = PintaCore.Chrome.DrawingArea.Allocation.Height;
+				Gtk.Viewport view = (Gtk.Viewport)PintaCore.Chrome.DrawingArea.Parent;
+
+				int window_x = view.Allocation.Width;
+				int window_y = view.Children[0].Allocation.Height;
 
 				if (CanvasSize.Width <= window_x && CanvasSize.Height <= window_y)
 					return true;
@@ -298,8 +296,10 @@ namespace Pinta.Core
 
 		public bool ImageFitsInWindow {
 			get {
-				int window_x = PintaCore.Chrome.DrawingArea.Allocation.Width;
-				int window_y = PintaCore.Chrome.DrawingArea.Allocation.Height;
+				Gtk.Viewport view = (Gtk.Viewport)PintaCore.Chrome.DrawingArea.Parent;
+
+				int window_x = view.Allocation.Width;
+				int window_y = view.Children[0].Allocation.Height;
 
 				if (ImageSize.Width <= window_x && ImageSize.Height <= window_y)
 					return true;
@@ -310,8 +310,10 @@ namespace Pinta.Core
 		
 		public void ScrollCanvas (int dx, int dy)
 		{
-			scrolledWindow.Hadjustment.Value = Utility.Clamp (dx + scrolledWindow.Hadjustment.Value, scrolledWindow.Hadjustment.Lower, scrolledWindow.Hadjustment.Upper - scrolledWindow.Hadjustment.PageSize);
-			scrolledWindow.Vadjustment.Value = Utility.Clamp (dy + scrolledWindow.Vadjustment.Value, scrolledWindow.Vadjustment.Lower, scrolledWindow.Vadjustment.Upper - scrolledWindow.Vadjustment.PageSize);
+			Gtk.Viewport view = (Gtk.Viewport)PintaCore.Chrome.DrawingArea.Parent;
+
+			view.Hadjustment.Value = Utility.Clamp (dx + view.Hadjustment.Value, view.Hadjustment.Lower, view.Hadjustment.Upper - view.Hadjustment.PageSize);
+			view.Vadjustment.Value = Utility.Clamp (dy + view.Vadjustment.Value, view.Vadjustment.Lower, view.Vadjustment.Upper - view.Vadjustment.PageSize);
 		}
 		
 		private void ResetTitle ()
@@ -337,5 +339,6 @@ namespace Pinta.Core
 		public event EventHandler<CanvasInvalidatedEventArgs> CanvasInvalidated;
 		public event EventHandler CanvasSizeChanged;
 		#endregion
+		
 	}
 }

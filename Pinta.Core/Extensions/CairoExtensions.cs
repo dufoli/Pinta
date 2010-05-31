@@ -24,6 +24,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// Some functions are from Paint.NET:
+
+/////////////////////////////////////////////////////////////////////////////////
+// Paint.NET                                                                   //
+// Copyright (C) dotPDN LLC, Rick Brewster, Tom Jackson, and contributors.     //
+// Portions Copyright (C) Microsoft Corporation. All Rights Reserved.          //
+// See license-pdn.txt for full licensing and attribution details.             //
+/////////////////////////////////////////////////////////////////////////////////
+
 using System;
 using Cairo;
 
@@ -324,8 +333,6 @@ namespace Pinta.Core
 			g.LineTo (r.X + radius, r.Y + r.Height);
 			g.Arc (r.X + radius, r.Y + r.Height - radius, radius, Math.PI / 2, Math.PI);
 			g.ClosePath ();
-
-			g.Restore ();
 			
 			g.Color = fill;
 			g.FillPreserve ();
@@ -357,8 +364,6 @@ namespace Pinta.Core
 			g.LineTo (r.X + radius, r.Y + r.Height);
 			g.Arc (r.X + radius, r.Y + r.Height - radius, radius, Math.PI / 2, Math.PI);
 			g.ClosePath ();
-			
-			g.Restore ();
 
 			g.Color = fill;
 			
@@ -497,19 +502,19 @@ namespace Pinta.Core
 			g.Restore ();
 		}
 
-		public static void DrawLinearGradient (this Context g, Surface oldsurface, eGradientColorMode mode, Color c1, Color c2, PointD p1, PointD p2)
+		public static void DrawLinearGradient (this Context g, Surface oldsurface, GradientColorMode mode, Color c1, Color c2, PointD p1, PointD p2)
 		{
 			g.Save ();
 			
 			Gradient gradient = new Cairo.LinearGradient (p1.X, p1.Y, p2.X, p2.Y);
 			
-			if (mode == eGradientColorMode.Color) {
+			if (mode == GradientColorMode.Color) {
 				gradient.AddColorStop (0, c1);
 				gradient.AddColorStop (1, c2);
 				g.Source = gradient;
 				g.Paint ();
 			}
-			else if (mode == eGradientColorMode.Transparency) {
+			else if (mode == GradientColorMode.Transparency) {
 				gradient.AddColorStop (0, new Color (0, 0, 0, 1));
 				gradient.AddColorStop (1, new Color (0, 0, 0, 0));
 				g.Source = new SurfacePattern (oldsurface);
@@ -519,20 +524,20 @@ namespace Pinta.Core
 			g.Restore ();
 		}
 
-		public static void DrawLinearReflectedGradient (this Context g, Surface oldsurface, eGradientColorMode mode, Color c1, Color c2, PointD p1, PointD p2)
+		public static void DrawLinearReflectedGradient (this Context g, Surface oldsurface, GradientColorMode mode, Color c1, Color c2, PointD p1, PointD p2)
 		{
 			g.Save ();
 			
 			Gradient gradient = new Cairo.LinearGradient (p1.X, p1.Y, p2.X, p2.Y);
 			
-			if (mode == eGradientColorMode.Color) {
+			if (mode == GradientColorMode.Color) {
 				gradient.AddColorStop (0, c1);
 				gradient.AddColorStop (0.5, c2);
 				gradient.AddColorStop (1, c1);
 				g.Source = gradient;
 				g.Paint ();
 			}
-			else if (mode == eGradientColorMode.Transparency) {
+			else if (mode == GradientColorMode.Transparency) {
 				gradient.AddColorStop (0, new Color (0, 0, 0, 1));
 				gradient.AddColorStop (0.5, new Color (0, 0, 0, 0));
 				gradient.AddColorStop (1, new Color (0, 0, 0, 1));
@@ -543,19 +548,19 @@ namespace Pinta.Core
 			g.Restore ();
 		}
 
-		public static void DrawRadialGradient (this Context g, Surface oldsurface, eGradientColorMode mode, Color c1, Color c2, PointD p1, PointD p2, double r1, double r2)
+		public static void DrawRadialGradient (this Context g, Surface oldsurface, GradientColorMode mode, Color c1, Color c2, PointD p1, PointD p2, double r1, double r2)
 		{
 			g.Save ();
 			
 			Gradient gradient = new Cairo.RadialGradient (p1.X, p1.Y, r1, p2.X, p2.Y, r2);
 			
-			if (mode == eGradientColorMode.Color) {
+			if (mode == GradientColorMode.Color) {
 				gradient.AddColorStop (0, c1);
 				gradient.AddColorStop (1, c2);
 				g.Source = gradient;
 				g.Paint ();
 			}
-			else if (mode == eGradientColorMode.Transparency) {
+			else if (mode == GradientColorMode.Transparency) {
 				gradient.AddColorStop (0, new Color (0, 0, 0, 1));
 				gradient.AddColorStop (1, new Color (0, 0, 0, 0));
 				g.Source = new SurfacePattern (oldsurface);
@@ -615,11 +620,16 @@ namespace Pinta.Core
 		{
 			if (x < r.X || x >= r.X + r.Width)
 				return false;
-			
+
 			if (y < r.Y || y >= r.Y + r.Height)
 				return false;
-			
+
 			return true;
+		}
+
+		public static bool ContainsPoint (this Cairo.Rectangle r, Cairo.PointD point)
+		{
+			return ContainsPoint (r, point.X, point.Y);
 		}
 		
 		public unsafe static Gdk.Pixbuf ToPixbuf (this Cairo.ImageSurface surf)
@@ -722,6 +732,11 @@ namespace Pinta.Core
 		public static string ToString2 (this Cairo.Color c)
 		{
 			return string.Format ("R: {0} G: {1} B: {2} A: {3}", c.R, c.G, c.B, c.A);
+		}
+
+		public static string ToString2 (this Cairo.PointD c)
+		{
+			return string.Format ("{0}, {1}", c.X, c.Y);
 		}
 
 		public static uint ToUint (this Cairo.Color c)
@@ -1383,6 +1398,11 @@ namespace Pinta.Core
 			g.Restore ();
 			
 			return path;
+		}
+		
+		public static Gdk.Point ToGdkPoint (this PointD point)
+		{
+			return new Gdk.Point ((int)point.X, (int)point.Y);
 		}
 	}
 }
