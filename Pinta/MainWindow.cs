@@ -48,7 +48,8 @@ namespace Pinta
 		ColorPaletteWidget color;
 		MenuBar main_menu;
 		ScrolledWindow sw;
-
+		DockFrame dock;
+		
 		public MainWindow () : base (WindowType.Toplevel)
 		{
 			CreateWindow ();
@@ -87,6 +88,7 @@ namespace Pinta
 			PintaCore.Actions.View.ZoomComboBox.ComboBox.Changed += HandlePintaCoreActionsViewZoomComboBoxComboBoxChanged;
 			
 			this.Icon = PintaCore.Resources.GetIcon ("Pinta.png");
+			canvas.IsFocus = true;
 
 			dialog_handler = new DialogHandlers (this);
 			PintaCore.Actions.View.ZoomToWindow.Activated += new EventHandler (ZoomToWindow_Activated);
@@ -95,6 +97,12 @@ namespace Pinta
 			PintaCore.Actions.File.NewFile (new Gdk.Size (800, 600));
 			
 			DeleteEvent += new DeleteEventHandler (MainWindow_DeleteEvent);
+			
+			PintaCore.Actions.File.BeforeQuit += delegate {
+				dock.SaveLayouts (System.IO.Path.Combine (PintaCore.Settings.GetUserSettingsDirectory (), "layouts.xml"));
+			};
+
+			PintaCore.Actions.Help.About.Activated += new EventHandler (About_Activated);
 			
 			if (Platform.GetOS () == Platform.OS.Mac) {
 				try {
@@ -155,6 +163,17 @@ namespace Pinta
 				PintaCore.Actions.View.SuspendZoomUpdate ();
 				(PintaCore.Actions.View.ZoomComboBox.ComboBox as ComboBoxEntry).Entry.Text = string.Format ("{0}%", (int)(PintaCore.Workspace.Scale * 100));
 				PintaCore.Actions.View.ResumeZoomUpdate ();
+			}
+		}
+
+		private void About_Activated (object sender, EventArgs e)
+		{
+			AboutDialog dlg = new AboutDialog ();
+
+			try {
+				dlg.Run ();
+			} finally {
+				dlg.Destroy ();
 			}
 		}
 		#endregion
@@ -277,10 +296,13 @@ namespace Pinta
 			Toolbar main_toolbar = new Toolbar () {
 				Name = "main_toolbar",
 				ShowArrow = false,
-				ToolbarStyle = ToolbarStyle.Icons,
-				IconSize = IconSize.SmallToolbar
 			};
-
+			
+			if (Platform.GetOS () == Platform.OS.Windows) {
+				main_toolbar.ToolbarStyle = ToolbarStyle.Icons;
+				main_toolbar.IconSize = IconSize.SmallToolbar;
+			}
+			
 			PintaCore.Actions.CreateToolBar (main_toolbar);
 
 			shell.PackStart (main_toolbar, false, false, 0);
@@ -294,8 +316,10 @@ namespace Pinta
 				ShowArrow = false,
 				ToolbarStyle = ToolbarStyle.Icons,
 				IconSize = IconSize.SmallToolbar,
-				HeightRequest = 28
 			};
+			
+			if (Platform.GetOS () == Platform.OS.Windows)
+				tool_toolbar.HeightRequest = 28;
 
 			shell.PackStart (tool_toolbar, false, false, 0);
 		}
@@ -331,7 +355,7 @@ namespace Pinta
 			};
 			
 			// Dock widget
-			DockFrame dock = new DockFrame ();
+			dock = new DockFrame ();
 			dock.CompactGuiLevel = 5;
 
 			// Toolbox pad
@@ -401,7 +425,14 @@ namespace Pinta
 
 			container.PackStart (dock, true, true, 0);
 			
-			dock.CreateLayout ("Default", false);
+			string layout_file = System.IO.Path.Combine (PintaCore.Settings.GetUserSettingsDirectory (), "layouts.xml");
+			
+			if (System.IO.File.Exists (layout_file))
+				dock.LoadLayouts (layout_file);
+			
+			if (!dock.HasLayout ("Default"))
+				dock.CreateLayout ("Default", false);
+				
 			dock.CurrentLayout = "Default";
 		}
 		
