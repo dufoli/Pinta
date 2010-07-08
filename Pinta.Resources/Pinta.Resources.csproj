@@ -397,7 +397,7 @@
     <EmbeddedResource Include="Resources\Menu.Effects.Stylize.Emboss.png">
       <LogicalName>Menu.Effects.Stylize.Emboss.png</LogicalName>
     </EmbeddedResource>
-	<EmbeddedResource Include="Resources\Toolbar.ConicalGradient.png">
+    <EmbeddedResource Include="Resources\Toolbar.ConicalGradient.png">
       <LogicalName>Toolbar.ConicalGradient.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Toolbar.DiamondGradient.png">
@@ -424,10 +424,23 @@
     <EmbeddedResource Include="Resources\Toolbar.BlendingOverwriteIcon.png">
       <LogicalName>Toolbar.BlendingOverwriteIcon.png</LogicalName>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\ShapeTool.OutlineFill.png">
       <LogicalName>ShapeTool.OutlineFill.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\About.Image.png">
+      <LogicalName>About.Image.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\About.ImageSep.png">
+      <LogicalName>About.ImageSep.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\About.MonoPowered.png">
+      <LogicalName>About.MonoPowered.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\About.ImageTop.png">
+      <LogicalName>About.ImageTop.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Menu.Help.Translate.png">
+      <LogicalName>Menu.Help.Translate.png</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

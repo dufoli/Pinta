@@ -32,6 +32,7 @@ using Gtk;
 using MonoDevelop.Components.Docking;
 using Pinta.Core;
 using Pinta.Gui.Widgets;
+using Mono.Unix;
 
 namespace Pinta
 {
@@ -48,7 +49,10 @@ namespace Pinta
 		ColorPaletteWidget color;
 		MenuBar main_menu;
 		ScrolledWindow sw;
-
+		DockFrame dock;
+		
+		Menu show_pad;
+		
 		public MainWindow () : base (WindowType.Toplevel)
 		{
 			CreateWindow ();
@@ -87,6 +91,7 @@ namespace Pinta
 			PintaCore.Actions.View.ZoomComboBox.ComboBox.Changed += HandlePintaCoreActionsViewZoomComboBoxComboBoxChanged;
 			
 			this.Icon = PintaCore.Resources.GetIcon ("Pinta.png");
+			canvas.IsFocus = true;
 
 			dialog_handler = new DialogHandlers (this);
 			PintaCore.Actions.View.ZoomToWindow.Activated += new EventHandler (ZoomToWindow_Activated);
@@ -95,6 +100,15 @@ namespace Pinta
 			PintaCore.Actions.File.NewFile (new Gdk.Size (800, 600));
 			
 			DeleteEvent += new DeleteEventHandler (MainWindow_DeleteEvent);
+			
+			PintaCore.Actions.File.BeforeQuit += delegate {
+				dock.SaveLayouts (System.IO.Path.Combine (PintaCore.Settings.GetUserSettingsDirectory (), "layouts.xml"));
+				PintaCore.Settings.PutSetting ("window-size-width", this.GdkWindow.GetSize ().Width);
+				PintaCore.Settings.PutSetting ("window-size-height", this.GdkWindow.GetSize ().Height);
+				PintaCore.Settings.SaveSettings ();
+			};
+
+			PintaCore.Actions.Help.About.Activated += new EventHandler (About_Activated);
 			
 			if (Platform.GetOS () == Platform.OS.Mac) {
 				try {
@@ -110,7 +124,7 @@ namespace Pinta
 					//add a new group to the app menu, and add some items to it
 					var appGroup = IgeMacMenu.AddAppMenuGroup ();
 					MenuItem aboutItem = (MenuItem)PintaCore.Actions.Help.About.CreateMenuItem ();
-					appGroup.AddMenuItem (aboutItem, Mono.Unix.Catalog.GetString ("About"));
+					appGroup.AddMenuItem (aboutItem, Catalog.GetString ("About"));
 
 					main_menu.Hide ();
 				} catch {
@@ -157,13 +171,22 @@ namespace Pinta
 				PintaCore.Actions.View.ResumeZoomUpdate ();
 			}
 		}
+
+		private void About_Activated (object sender, EventArgs e)
+		{
+			AboutDialog dlg = new AboutDialog ();
+
+			try {
+				dlg.Run ();
+			} finally {
+				dlg.Destroy ();
+			}
+		}
 		#endregion
 
 		#region Extension Handlers
 		private void Compose ()
 		{
-			Gtk.StatusIcon s = new StatusIcon ();
-
 			string ext_dir = System.IO.Path.Combine (System.IO.Path.GetDirectoryName (System.Reflection.Assembly.GetEntryAssembly ().Location), "Extensions");
 
 			var catalog = new DirectoryCatalog (ext_dir, "*.dll");
@@ -212,7 +235,7 @@ namespace Pinta
 
 			// Try to set the paint brush as the default tool, if that
 			// fails, set the first thing we can find.
-			if (!PintaCore.Tools.SetCurrentTool ("PaintBrush"))
+			if (!PintaCore.Tools.SetCurrentTool (Catalog.GetString ("Paintbrush")))
 				PintaCore.Tools.SetCurrentTool (extensions.Tools.First ());
 
 			foreach (var tool in PintaCore.Tools)
@@ -225,11 +248,11 @@ namespace Pinta
 		{
 			// Window
 			Name = "Pinta.MainWindow";
-			Title = Mono.Unix.Catalog.GetString ("Pinta!");
+			Title = "Pinta";
 			WindowPosition = WindowPosition.Center;
 			AllowShrink = true;
-			DefaultWidth = 1100;
-			DefaultHeight = 750;
+			DefaultWidth = PintaCore.Settings.GetSetting<int> ("window-size-width", 1100);
+			DefaultHeight = PintaCore.Settings.GetSetting<int> ("window-size-height", 750);
 
 			// shell - contains mainmenu, 2 toolbars, hbox
 			VBox shell = new VBox () {
@@ -257,15 +280,22 @@ namespace Pinta
 				Name = "main_menu"
 			};
 
-			main_menu.Append (new Gtk.Action ("file", "File").CreateMenuItem ());
-			main_menu.Append (new Gtk.Action ("edit", "Edit").CreateMenuItem ());
-			main_menu.Append (new Gtk.Action ("view", "View").CreateMenuItem ());
-			main_menu.Append (new Gtk.Action ("image", "Image").CreateMenuItem ());
-			main_menu.Append (new Gtk.Action ("layers", "Layers").CreateMenuItem ());
-			main_menu.Append (new Gtk.Action ("adjustments", "Adjustments").CreateMenuItem ());
-			main_menu.Append (new Gtk.Action ("effects", "Effects").CreateMenuItem ());
-			main_menu.Append (new Gtk.Action ("window", "Window").CreateMenuItem ());
-			main_menu.Append (new Gtk.Action ("help", "Help").CreateMenuItem ());
+			main_menu.Append (new Gtk.Action ("file", Catalog.GetString ("_File")).CreateMenuItem ());
+			main_menu.Append (new Gtk.Action ("edit", Catalog.GetString ("_Edit")).CreateMenuItem ());
+			main_menu.Append (new Gtk.Action ("view", Catalog.GetString ("_View")).CreateMenuItem ());
+			main_menu.Append (new Gtk.Action ("image", Catalog.GetString ("_Image")).CreateMenuItem ());
+			main_menu.Append (new Gtk.Action ("layers", Catalog.GetString ("_Layers")).CreateMenuItem ());
+			main_menu.Append (new Gtk.Action ("adjustments", Catalog.GetString ("_Adjustments")).CreateMenuItem ());
+			main_menu.Append (new Gtk.Action ("effects", Catalog.GetString ("Effe_cts")).CreateMenuItem ());
+
+			MenuItem window = (MenuItem)new Gtk.Action ("window", Catalog.GetString ("_Window")).CreateMenuItem ();
+			main_menu.Append (window);
+
+			Gtk.Action pads = new Gtk.Action ("pads", Mono.Unix.Catalog.GetString ("Show Pad"), null, null);
+			window.Submenu = new Menu ();
+			show_pad = (Menu)((Menu)(window.Submenu)).AppendItem (pads.CreateSubMenuItem ()).Submenu;
+
+			main_menu.Append (new Gtk.Action ("help", Catalog.GetString ("_Help")).CreateMenuItem ());
 
 			PintaCore.Actions.CreateMainMenu (main_menu);
 			shell.PackStart (main_menu, false, false, 0);
@@ -277,10 +307,13 @@ namespace Pinta
 			Toolbar main_toolbar = new Toolbar () {
 				Name = "main_toolbar",
 				ShowArrow = false,
-				ToolbarStyle = ToolbarStyle.Icons,
-				IconSize = IconSize.SmallToolbar
 			};
-
+			
+			if (Platform.GetOS () == Platform.OS.Windows) {
+				main_toolbar.ToolbarStyle = ToolbarStyle.Icons;
+				main_toolbar.IconSize = IconSize.SmallToolbar;
+			}
+			
 			PintaCore.Actions.CreateToolBar (main_toolbar);
 
 			shell.PackStart (main_toolbar, false, false, 0);
@@ -294,8 +327,10 @@ namespace Pinta
 				ShowArrow = false,
 				ToolbarStyle = ToolbarStyle.Icons,
 				IconSize = IconSize.SmallToolbar,
-				HeightRequest = 28
 			};
+			
+			if (Platform.GetOS () == Platform.OS.Windows)
+				tool_toolbar.HeightRequest = 28;
 
 			shell.PackStart (tool_toolbar, false, false, 0);
 		}
@@ -331,29 +366,40 @@ namespace Pinta
 			};
 			
 			// Dock widget
-			DockFrame dock = new DockFrame ();
+			dock = new DockFrame ();
 			dock.CompactGuiLevel = 5;
 
+			Gtk.IconFactory fact = new Gtk.IconFactory ();
+			fact.Add ("Tools.Pencil.png", new Gtk.IconSet (PintaCore.Resources.GetIcon ("Tools.Pencil.png")));
+			fact.Add ("Pinta.png", new Gtk.IconSet (PintaCore.Resources.GetIcon ("Pinta.png")));
+			fact.AddDefault ();
+			
 			// Toolbox pad
 			DockItem toolbox_item = dock.AddItem ("Toolbox");
 			toolbox = new ToolBoxWidget () { Name = "toolbox" };
 			
-			toolbox_item.Label = "Tools";
+			toolbox_item.Label = Catalog.GetString ("Tools");
 			toolbox_item.Content = toolbox;
 			toolbox_item.Icon = PintaCore.Resources.GetIcon ("Tools.Pencil.png");
 			toolbox_item.Behavior |= DockItemBehavior.CantClose;
 			toolbox_item.DefaultWidth = 65;
+			
+			Gtk.Action show_toolbox = show_pad.AppendAction ("Tools", Catalog.GetString ("Tools"), null, "Tools.Pencil.png");
+			show_toolbox.Activated += delegate { toolbox_item.Visible = true; };
 		
 			// Palette pad
 			DockItem palette_item = dock.AddItem ("Palette");
 			color = new ColorPaletteWidget () { Name = "color" };
 
-			palette_item.Label = "Palette";
+			palette_item.Label = Catalog.GetString ("Palette");
 			palette_item.Content = color;
 			palette_item.Icon = PintaCore.Resources.GetIcon ("Pinta.png");
 			palette_item.DefaultLocation = "Toolbox/Bottom";
 			palette_item.Behavior |= DockItemBehavior.CantClose;
 			palette_item.DefaultWidth = 65;
+
+			Gtk.Action show_palette = show_pad.AppendAction ("Palette", Catalog.GetString ("Palette"), null, "Pinta.png");
+			show_palette.Activated += delegate { palette_item.Visible = true; };
 		
 			// Canvas pad
 			DockItem documentDockItem = dock.AddItem ("Canvas");
@@ -361,7 +407,7 @@ namespace Pinta
 			documentDockItem.Expand = true;
 
 			documentDockItem.DrawFrame = false;
-			documentDockItem.Label = "Documents";
+			documentDockItem.Label = Catalog.GetString ("Documents");
 			documentDockItem.Content = sw;
 			
 			sw.Add (vp);
@@ -375,7 +421,7 @@ namespace Pinta
 			DockItem layers_item = dock.AddItem ("Layers");
 			DockItemToolbar layers_tb = layers_item.GetToolbar (PositionType.Bottom);
 			
-			layers_item.Label = "Layers";
+			layers_item.Label = Catalog.GetString ("Layers");
 			layers_item.Content = layers;
 			layers_item.Icon = PintaCore.Resources.GetIcon ("Menu.Layers.MergeLayerDown.png");
 
@@ -386,12 +432,15 @@ namespace Pinta
 			layers_tb.Add (PintaCore.Actions.Layers.MoveLayerUp.CreateDockToolBarItem ());
 			layers_tb.Add (PintaCore.Actions.Layers.MoveLayerDown.CreateDockToolBarItem ());
 
+			Gtk.Action show_layers = show_pad.AppendAction ("Layers", Catalog.GetString ("Layers"), null, "Menu.Layers.MergeLayerDown.png");
+			show_layers.Activated += delegate { layers_item.Visible = true; };
+
 			// History pad
 			HistoryTreeView history = new HistoryTreeView ();
 			DockItem history_item = dock.AddItem ("History");
 			DockItemToolbar history_tb = history_item.GetToolbar (PositionType.Bottom);
 			
-			history_item.Label = "History";
+			history_item.Label = Catalog.GetString ("History");
 			history_item.DefaultLocation = "Layers/Bottom";
 			history_item.Content = history;
 			history_item.Icon = PintaCore.Resources.GetIcon ("Menu.Layers.DuplicateLayer.png");
@@ -399,9 +448,19 @@ namespace Pinta
 			history_tb.Add (PintaCore.Actions.Edit.Undo.CreateDockToolBarItem ());
 			history_tb.Add (PintaCore.Actions.Edit.Redo.CreateDockToolBarItem ());
 
+			Gtk.Action show_history = show_pad.AppendAction ("History", Catalog.GetString ("History"), null, "Menu.Layers.DuplicateLayer.png");
+			show_history.Activated += delegate { history_item.Visible = true; };
+
 			container.PackStart (dock, true, true, 0);
 			
-			dock.CreateLayout ("Default", false);
+			string layout_file = System.IO.Path.Combine (PintaCore.Settings.GetUserSettingsDirectory (), "layouts.xml");
+			
+			if (System.IO.File.Exists (layout_file))
+				dock.LoadLayouts (layout_file);
+			
+			if (!dock.HasLayout ("Default"))
+				dock.CreateLayout ("Default", false);
+				
 			dock.CurrentLayout = "Default";
 		}
 		

@@ -27,6 +27,8 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using Gtk;
+using Mono.Unix;
 
 namespace Pinta.Core
 {
@@ -34,6 +36,7 @@ namespace Pinta.Core
 	{
 		public Gtk.Action Website { get; private set; }
 		public Gtk.Action Bugs { get; private set; }
+		public Gtk.Action Translate { get; private set; }
 		public Gtk.Action About { get; private set; }
 
 		public HelpActions ()
@@ -41,11 +44,13 @@ namespace Pinta.Core
 			Gtk.IconFactory fact = new Gtk.IconFactory ();
 			fact.Add ("Menu.Help.Bug.png", new Gtk.IconSet (PintaCore.Resources.GetIcon ("Menu.Help.Bug.png")));
 			fact.Add ("Menu.Help.Website.png", new Gtk.IconSet (PintaCore.Resources.GetIcon ("Menu.Help.Website.png")));
+			fact.Add ("Menu.Help.Translate.png", new Gtk.IconSet (PintaCore.Resources.GetIcon ("Menu.Help.Translate.png")));
 			fact.AddDefault ();
 			
-			Website = new Gtk.Action ("Website", Mono.Unix.Catalog.GetString ("Pinta Website"), null, "Menu.Help.Website.png");
-			Bugs = new Gtk.Action ("Bugs", Mono.Unix.Catalog.GetString ("File a Bug"), null, "Menu.Help.Bug.png");
-			About = new Gtk.Action ("About", Mono.Unix.Catalog.GetString ("About"), null, "gtk-about");
+			Website = new Gtk.Action ("Website", Catalog.GetString ("Pinta Website"), null, "Menu.Help.Website.png");
+			Bugs = new Gtk.Action ("Bugs", Catalog.GetString ("File a Bug"), null, "Menu.Help.Bug.png");
+			Translate = new Gtk.Action ("Translate", Catalog.GetString ("Translate This Application"), null, "Menu.Help.Translate.png");
+			About = new Gtk.Action ("About", Catalog.GetString ("About"), null, Stock.About);
 		}
 
 		#region Initialization
@@ -53,6 +58,7 @@ namespace Pinta.Core
 		{
 			menu.Append (Website.CreateMenuItem ());
 			menu.Append (Bugs.CreateMenuItem ());
+			menu.Append (Translate.CreateMenuItem ());
 			menu.AppendSeparator ();
 			menu.Append (About.CreateMenuItem ());
 		}
@@ -61,29 +67,17 @@ namespace Pinta.Core
 		{
 			Website.Activated += new EventHandler (Website_Activated);
 			Bugs.Activated += new EventHandler (Bugs_Activated);
-			About.Activated += new EventHandler (About_Activated);
-		}
-
-		private void About_Activated (object sender, EventArgs e)
-		{
-			Gtk.AboutDialog dialog = new Gtk.AboutDialog ();
-
-			dialog.Icon = PintaCore.Resources.GetIcon ("Pinta.png");
-			dialog.Version = "0.3";
-			dialog.ProgramName = "Pinta";
-			dialog.Website = "http://www.pinta-project.com";
-			dialog.WebsiteLabel = "Visit Homepage";
-			dialog.Copyright = "Copyright \xa9 2010 Jonathan Pobst";
-			dialog.Authors = new string[] { "Jonathan Pobst" };
-			dialog.Documenters = null;
-			dialog.TranslatorCredits = null;
-			dialog.Run ();
-			dialog.Destroy ();
+			Translate.Activated += Translate_Activated;
 		}
 
 		private void Bugs_Activated (object sender, EventArgs e)
 		{
-			Process.Start ("http://www.pinta-project.com/Contribute");
+			Process.Start ("https://bugs.launchpad.net/pinta");
+		}
+
+		private void Translate_Activated (object sender, EventArgs e)
+		{
+			Process.Start ("https://translations.launchpad.net/pinta");
 		}
 
 		private void Website_Activated (object sender, EventArgs e)

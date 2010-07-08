@@ -25,10 +25,11 @@
 // THE SOFTWARE.
 
 using System;
-using Gtk;
+using System.Collections.Generic;
+using System.IO;
 using Gdk;
+using Gtk;
 using Mono.Unix;
-
 
 namespace Pinta.Core
 {
@@ -43,14 +44,18 @@ namespace Pinta.Core
 		public Gtk.Action Print { get; private set; }
 		public Gtk.Action Exit { get; private set; }
 		
+		private IList<FormatDescriptor> formats;
+		private IDictionary<string, FormatDescriptor> formatsByExt;
 		private RecentData recentData;
+		private string lastDialogDir;
+		
+		public event EventHandler BeforeQuit;
 		
 		public FileActions ()
 		{
-			New = new Gtk.Action ("New", Mono.Unix.Catalog.GetString ("New..."), null, "gtk-new");
-			Open = new Gtk.Action ("Open", Mono.Unix.Catalog.GetString ("Open..."), null, "gtk-open");
-			OpenRecent = new RecentAction ("OpenRecent", Catalog.GetString ("Open Recent"), null, "gtk-open",
-			                               RecentManager.Default);
+			New = new Gtk.Action ("New", Catalog.GetString ("New..."), null, Stock.New);
+			Open = new Gtk.Action ("Open", Catalog.GetString ("Open..."), null, Stock.Open);
+			OpenRecent = new RecentAction ("OpenRecent", Catalog.GetString ("Open Recent"), null, Stock.Open, RecentManager.Default);
 			
 			RecentFilter recentFilter = new RecentFilter ();
 			recentFilter.AddApplication ("Pinta");
@@ -61,14 +66,24 @@ namespace Pinta.Core
 			recentData.AppName = "Pinta";
 			recentData.AppExec = GetExecutablePathname ();
 			recentData.MimeType = "image/*";
+			
+			formats = new List<FormatDescriptor> ();
+			formatsByExt = new SortedDictionary<string, FormatDescriptor> ();
+			FillFormats ();
+			
+			lastDialogDir = System.Environment.GetFolderPath (Environment.SpecialFolder.MyPictures);
 
-			Close = new Gtk.Action ("Close", Mono.Unix.Catalog.GetString ("Close"), null, "gtk-close");
-			Save = new Gtk.Action ("Save", Mono.Unix.Catalog.GetString ("Save"), null, "gtk-save");
-			SaveAs = new Gtk.Action ("SaveAs", Mono.Unix.Catalog.GetString ("Save As..."), null, "gtk-save-as");
-			Print = new Gtk.Action ("Print", Mono.Unix.Catalog.GetString ("Print"), null, "gtk-print");
-			Exit = new Gtk.Action ("Exit", Mono.Unix.Catalog.GetString ("Quit"), null, "gtk-quit");
+			Close = new Gtk.Action ("Close", Catalog.GetString ("Close"), null, Stock.Close);
+			Save = new Gtk.Action ("Save", Catalog.GetString ("Save"), null, Stock.Save);
+			SaveAs = new Gtk.Action ("SaveAs", Catalog.GetString ("Save As..."), null, Stock.SaveAs);
+			Print = new Gtk.Action ("Print", Catalog.GetString ("Print"), null, Stock.Print);
+			Exit = new Gtk.Action ("Exit", Catalog.GetString ("Quit"), null, Stock.Quit);
 
-//			OpenRecent.Sensitive = false;
+			New.ShortLabel = Catalog.GetString ("New");
+			Open.ShortLabel = Catalog.GetString ("Open");
+			Open.IsImportant = true;
+			Save.IsImportant = true;
+			
 			Close.Sensitive = false;
 			Print.Sensitive = false;
 		}
@@ -98,6 +113,26 @@ namespace Pinta.Core
 			Exit.Activated += HandlePintaCoreActionsFileExitActivated;
 		}
 		
+		private void FillFormats ()
+		{
+			foreach (var format in Pixbuf.Formats) {
+				string formatName = format.Name.ToLowerInvariant ();
+				GdkPixbufFormat handler = new GdkPixbufFormat (format.Name.ToLowerInvariant ());
+				string[] extensions = (formatName == "jpeg") ? new string[] { "jpg", "jpeg" } : new string[] { formatName };
+			
+				formats.Add (new FormatDescriptor (formatName, formatName.ToUpperInvariant(), extensions, handler, format.IsWritable ? handler : null));
+			}
+			
+			OraFormat oraHandler = new OraFormat ();
+			formats.Add (new FormatDescriptor ("ora", "OpenRaster", new string[] { "ora" }, oraHandler, oraHandler));
+			
+			foreach (var fd in formats) {
+				foreach (var ext in fd.Extensions) {
+					formatsByExt.Add (string.Format (".{0}", ext), fd);
+				}
+			}
+		}
+		
 		#endregion
 
 		#region Public Methods
@@ -113,7 +148,7 @@ namespace Pinta.Core
 			PintaCore.Layers.ResetSelectionPath ();
 
 			// Start with an empty white layer
-			Layer background = PintaCore.Layers.AddNewLayer ("Background");
+			Layer background = PintaCore.Layers.AddNewLayer (Catalog.GetString ("Background"));
 
 			using (Cairo.Context g = new Cairo.Context (background.Surface)) {
 				g.SetSourceRGB (255, 255, 255);
@@ -121,7 +156,7 @@ namespace Pinta.Core
 			}
 
 			PintaCore.Workspace.Filename = "Untitled1";
-			PintaCore.History.PushNewItem (new BaseHistoryItem ("gtk-new", "New Image"));
+			PintaCore.History.PushNewItem (new BaseHistoryItem (Stock.New, Catalog.GetString ("New Image")));
 			PintaCore.Workspace.IsDirty = false;
 			PintaCore.Actions.View.ZoomToWindow.Activate ();
 		}
@@ -132,36 +167,19 @@ namespace Pinta.Core
 			
 			try {
 				// Open the image and add it to the layers
-				Pixbuf bg = new Pixbuf (file);
-
-				PintaCore.Layers.Clear ();
-				PintaCore.History.Clear ();
-				PintaCore.Layers.DestroySelectionLayer ();
-
-				PintaCore.Workspace.ImageSize = new Size (bg.Width, bg.Height);
-				PintaCore.Workspace.CanvasSize = new Gdk.Size (bg.Width, bg.Height);
-
-				PintaCore.Layers.ResetSelectionPath ();
-
-				Layer layer = PintaCore.Layers.AddNewLayer (System.IO.Path.GetFileName (file));
-
-				using (Cairo.Context g = new Cairo.Context (layer.Surface)) {
-					CairoHelper.SetSourcePixbuf (g, bg, 0, 0);
-					g.Paint ();
-				}
-
-				bg.Dispose ();
+				IImageImporter importer = formatsByExt[System.IO.Path.GetExtension (file)].Importer;
+				importer.Import (PintaCore.Layers, file);
 
 				PintaCore.Workspace.DocumentPath = System.IO.Path.GetFullPath (file);
-				PintaCore.History.PushNewItem (new BaseHistoryItem ("gtk-open", "Open Image"));
+				PintaCore.History.PushNewItem (new BaseHistoryItem (Stock.Open, Catalog.GetString ("Open Image")));
 				PintaCore.Workspace.IsDirty = false;
 				PintaCore.Actions.View.ZoomToWindow.Activate ();
 				PintaCore.Workspace.Invalidate ();
 				
 				fileOpened = true;
 			} catch {
-				MessageDialog md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal, MessageType.Error, ButtonsType.Ok, "Could not open file: {0}", file);
-				md.Title = "Error";
+				MessageDialog md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal, MessageType.Error, ButtonsType.Ok, Catalog.GetString ("Could not open file: {0}"), file);
+				md.Title = Catalog.GetString ("Error");
 				
 				md.Run ();
 				md.Destroy ();
@@ -263,10 +281,25 @@ namespace Pinta.Core
 														FileChooserAction.Open, Gtk.Stock.Cancel, Gtk.ResponseType.Cancel,
 														Gtk.Stock.Open, Gtk.ResponseType.Ok);
 
-				int response = fcd.Run ();
+				// Add image files filter
+				FileFilter ff = new FileFilter ();
+				ff.AddPixbufFormats ();
+				ff.AddPattern ("*.ora");
+				ff.Name = Catalog.GetString ("Image files");
+				fcd.AddFilter (ff);
+				
+				FileFilter ff2 = new FileFilter ();
+				ff2.Name = Catalog.GetString ("All files");
+				ff2.AddPattern ("*.*");
+				fcd.AddFilter (ff2);
+				
+				fcd.SetCurrentFolder (lastDialogDir);
 
+				int response = fcd.Run ();
 			
 				if (response == (int)Gtk.ResponseType.Ok) {
+					lastDialogDir = fcd.CurrentFolder;
+
 					if (OpenFile (fcd.Filename)) {
 						AddRecentFileUri (fcd.Uri);
 
@@ -281,7 +314,7 @@ namespace Pinta.Core
 		private void HandlePintaCoreActionsFileSaveActivated (object sender, EventArgs e)
 		{
 			if (PintaCore.Workspace.ActiveDocument.HasFile)
-				SaveFile (PintaCore.Workspace.ActiveDocument.Pathname);
+				SaveFile (PintaCore.Workspace.ActiveDocument.Pathname, null);
 			else
 				HandlePintaCoreActionsFileSaveAsActivated (null, EventArgs.Empty);
 		}
@@ -296,16 +329,38 @@ namespace Pinta.Core
 			                                                       Gtk.Stock.Save, Gtk.ResponseType.Ok);
 			
 			fcd.DoOverwriteConfirmation = true;
+			fcd.SetCurrentFolder (lastDialogDir);
+			bool hasFile = PintaCore.Workspace.ActiveDocument.HasFile;
+			string currentExt = null;
+			
+			if (hasFile) {
+				fcd.CurrentName = PintaCore.Workspace.Filename;
+				currentExt = Path.GetExtension(PintaCore.Workspace.Filename.ToLowerInvariant ());
+			}
+			
+			Dictionary<FileFilter, FormatDescriptor> filetypes = new Dictionary<FileFilter, FormatDescriptor> ();
+						
+			// Add all the formats we support to the save dialog
+			foreach (var format in formats) {
+				if (!format.IsReadOnly ()) {
+					fcd.AddFilter (format.Filter);
+					filetypes.Add (format.Filter, format);
+					
+					if ((hasFile && formatsByExt[currentExt] == format) || (!hasFile && format.Name == "jpeg")) {
+						fcd.Filter = format.Filter;
+					}
+				}
+			}
 			
 			int response = fcd.Run ();
 			
 			if (response == (int)Gtk.ResponseType.Ok) {
-				SaveFile (fcd.Filename);
+				lastDialogDir = fcd.CurrentFolder;
+				SaveFile (fcd.Filename, filetypes[fcd.Filter]);
 				AddRecentFileUri (fcd.Uri);
 
 				PintaCore.Workspace.ActiveDocument.HasFile = true;
 			}
-
 
 			fcd.Destroy ();
 		}
@@ -344,29 +399,37 @@ namespace Pinta.Core
 			}
 
 			if (!canceled) {
+				if (BeforeQuit != null)
+					BeforeQuit (this, EventArgs.Empty);
+					
 				PintaCore.History.Clear ();
 				(PintaCore.Layers.SelectionPath as IDisposable).Dispose ();
 				Application.Quit ();
 			}
 		}
 		#endregion
-
+		
 		#region Private Methods
-		private void SaveFile (string file)
+		private void SaveFile (string file, FormatDescriptor format)
 		{
-			Cairo.ImageSurface surf = PintaCore.Layers.GetFlattenedImage ();
-
-			Pixbuf pb = surf.ToPixbuf ();
-
-			if (System.IO.Path.GetExtension (file) == ".jpeg" || System.IO.Path.GetExtension (file) == ".jpg")
-				pb.Save (file, "jpeg");
-			else
-				pb.Save (file, "png");
-
-			(pb as IDisposable).Dispose ();
-			(surf as IDisposable).Dispose ();
+			if (format == null) {
+				string ext = System.IO.Path.GetExtension (file);
+				// Is the fallback to PNG even necessary?
+				format = formatsByExt[string.IsNullOrEmpty (ext) ? ".png" : ext];
+			}
 			
-			PintaCore.Workspace.Filename = System.IO.Path.GetFileName (file);
+			if (format == null || format.IsReadOnly ()) {
+				MessageDialog md = new MessageDialog (PintaCore.Chrome.MainWindow, DialogFlags.Modal, MessageType.Error, ButtonsType.Ok, Catalog.GetString ("Pinta does not support saving images in this file format."), file);
+				md.Title = Catalog.GetString ("Error");
+				
+				md.Run ();
+				md.Destroy ();
+				return;
+			}
+			
+			format.Exporter.Export (PintaCore.Layers, file);
+
+			PintaCore.Workspace.Filename = Path.GetFileName (file);
 			PintaCore.Workspace.IsDirty = false;
 		}
 		#endregion

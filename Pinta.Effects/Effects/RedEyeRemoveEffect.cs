@@ -12,6 +12,7 @@ using Cairo;
 
 using Pinta.Gui.Widgets;
 using Pinta.Core;
+using Mono.Unix;
 
 namespace Pinta.Effects
 {
@@ -25,7 +26,7 @@ namespace Pinta.Effects
 		}
 
 		public override string Text {
-			get { return Mono.Unix.Catalog.GetString ("Red Eye Removal"); }
+			get { return Catalog.GetString ("Red Eye Removal"); }
 		}
 
 		public override bool IsConfigurable {
@@ -33,7 +34,7 @@ namespace Pinta.Effects
 		}
 
 		public override string EffectMenuCategory {
-			get { return "Photo"; }
+			get { return Catalog.GetString ("Photo"); }
 		}
 
 		public RedEyeRemoveData Data { get { return EffectData as RedEyeRemoveData; } }
@@ -75,7 +76,7 @@ namespace Pinta.Effects
 		
 		[MinimumValue (0), MaximumValue (100)]
 		[Caption ("Saturation percentage")]
-		[Hint ("Hint : For best results, first use selection tools to select each eye")]
+		[Hint ("Hint: For best results, first use selection tools to select each eye.")]
 		public int Saturation = 90;
 	}
 }
