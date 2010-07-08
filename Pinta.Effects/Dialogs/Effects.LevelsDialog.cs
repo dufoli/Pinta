@@ -52,7 +52,7 @@ namespace Pinta.Effects
 		public LevelsDialog (LevelsData effectData)
 		{			
 			this.Build ();
-			
+			spinOutGamma.Adjustment.StepIncrement = 0.1;
 			EffectData = effectData;			
 			mask = new bool[] {true, true, true};
 

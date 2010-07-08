@@ -1,14 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <stetic-interface>
   <configuration>
     <images-root-path>..</images-root-path>
     <target-gtk-version>2.12</target-gtk-version>
   </configuration>
   <import>
-    <widget-library name="..\..\bin\Pinta.Core.dll" />
-    <widget-library name="..\..\Pinta.Gui.Widgets\bin\Debug\Pinta.Gui.Widgets.dll" />
-    <widget-library name="..\..\bin\Pinta.Resources.dll" />
-    <widget-library name="..\..\bin\Extensions\Pinta.Effects.dll" internal="true" />
+    <widget-library name="../../bin/Pinta.Core.dll" />
+    <widget-library name="../../bin/Pinta.Gui.Widgets.dll" />
+    <widget-library name="../../bin/Extensions/Pinta.Effects.dll" internal="true" />
   </import>
   <widget class="Gtk.Dialog" id="Pinta.Effects.LevelsDialog" design-size="1754 326">
     <property name="MemberName" />
@@ -363,7 +362,7 @@
                             <property name="CanFocus">True</property>
                             <property name="Upper">100</property>
                             <property name="PageIncrement">10</property>
-                            <property name="StepIncrement">0.1</property>
+                            <property name="StepIncrement">1</property>
                             <property name="ClimbRate">1</property>
                             <property name="Numeric">True</property>
                             <property name="Value">1</property>

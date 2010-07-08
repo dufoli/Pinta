@@ -330,6 +330,8 @@ namespace Pinta
 		private void CreateDockAndPads (HBox container)
 		{
 			// Create canvas
+			Table mainTable = new Table (2, 2, false);
+
 			sw = new ScrolledWindow () {
 				Name = "sw",
 				ShadowType = ShadowType.EtchedOut
@@ -338,7 +340,9 @@ namespace Pinta
 			Viewport vp = new Viewport () {
 				ShadowType = ShadowType.None
 			};
-			
+
+
+
 			canvas = new PintaCanvas () {
 				Name = "canvas",
 				CanDefault = true,
@@ -389,8 +393,32 @@ namespace Pinta
 
 			documentDockItem.DrawFrame = false;
 			documentDockItem.Label = Catalog.GetString ("Documents");
-			documentDockItem.Content = sw;
+			documentDockItem.Content = mainTable;
+
+			//rulers
+			hruler = new HRuler ();
+			hruler.Metric = MetricType.Pixels;
+			mainTable.Attach (hruler, 1, 2, 0, 1, AttachOptions.Shrink | AttachOptions.Fill, AttachOptions.Shrink | AttachOptions.Fill, 0, 0);
 			
+			vruler = new VRuler ();
+			vruler.Metric = MetricType.Pixels;
+			mainTable.Attach (vruler, 0, 1, 1, 2, AttachOptions.Shrink | AttachOptions.Fill, AttachOptions.Shrink | AttachOptions.Fill, 0, 0);
+
+			sw.Hadjustment.ValueChanged += delegate {
+				UpdateRulerRange ();
+			};
+			sw.Vadjustment.ValueChanged += delegate {
+				UpdateRulerRange ();
+			};
+
+			//UpdateRulerRange ();
+			
+			PintaCore.Actions.View.ZoomComboBox.ComboBox.Changed += delegate {
+				UpdateRulerRange ();
+			};
+
+			mainTable.Attach (sw, 1, 2, 1, 2, AttachOptions.Shrink | AttachOptions.Fill, AttachOptions.Shrink | AttachOptions.Fill, 0, 0);
+
 			sw.Add (vp);
 			vp.Add (canvas);
 
@@ -463,6 +491,76 @@ namespace Pinta
 		//                CursorPositionLabel.Text = string.Format ("{0}, {1}", pt.X, pt.Y);
 		//        };
 		//}
+		#endregion
+		#region rulers
+		private HRuler hruler;
+		private VRuler vruler;
+
+		public void ShowRulers ()
+		{
+			hruler.Show ();
+			vruler.Show ();
+		}
+
+		public void HideRulers ()
+		{
+			hruler.Hide ();
+			vruler.Hide ();
+		}
+
+		public void ChangeRulersUnit (Gtk.MetricType metric)
+		{
+			hruler.Metric = metric;
+			vruler.Metric = metric;
+			switch (metric) {
+			case Gtk.MetricType.Pixels:
+				if (PintaCore.Actions.View.UnitComboBox.ComboBox.Active != 0)
+					PintaCore.Actions.View.UnitComboBox.ComboBox.Active = 0;
+				break;
+			case Gtk.MetricType.Inches:
+				if (PintaCore.Actions.View.UnitComboBox.ComboBox.Active != 1)
+					PintaCore.Actions.View.UnitComboBox.ComboBox.Active = 1;
+				break;
+			case Gtk.MetricType.Centimeters:
+				if (PintaCore.Actions.View.UnitComboBox.ComboBox.Active != 2)
+					PintaCore.Actions.View.UnitComboBox.ComboBox.Active = 2;
+				break;
+				
+			}
+		}
+
+		void UpdateRulerRange ()
+		{
+			Gtk.Main.Iteration (); //Force update of scrollbar upper before recenter
+
+			Cairo.PointD lower = new Cairo.PointD (0, 0);
+			Cairo.PointD upper = new Cairo.PointD (0, 0);
+
+			if (PintaCore.Workspace.Offset.X > 0) {
+				lower.X = - PintaCore.Workspace.Offset.X / PintaCore.Workspace.Scale;
+				upper.X = PintaCore.Workspace.ImageSize.Width - lower.X;
+			}
+			else {
+				lower.X = sw.Hadjustment.Value / PintaCore.Workspace.Scale;
+				upper.X = (sw.Hadjustment.Value + sw.Hadjustment.PageSize) / PintaCore.Workspace.Scale;
+			}
+			if (PintaCore.Workspace.Offset.Y > 0) {
+				lower.Y = - PintaCore.Workspace.Offset.Y / PintaCore.Workspace.Scale;
+				upper.Y = PintaCore.Workspace.ImageSize.Height - lower.Y;
+			}
+			else {
+				lower.Y = sw.Vadjustment.Value / PintaCore.Workspace.Scale;
+				upper.Y = (sw.Vadjustment.Value + sw.Vadjustment.PageSize) / PintaCore.Workspace.Scale;
+			}
+
+			hruler.SetRange (lower.X, upper.X, 0, upper.X);
+			vruler.SetRange (lower.Y, upper.Y, 0, upper.Y);
+		}
+		protected virtual void HandleScroll (object o, Gtk.ScrollChildArgs args)
+		{
+			UpdateRulerRange ();
+		}
+
 		#endregion
 	}
 }
