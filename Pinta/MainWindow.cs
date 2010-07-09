@@ -436,6 +436,8 @@ namespace Pinta
 			canvas.Show ();
 			vp.Show ();
 
+			HideRulers();
+
 			// Layer pad
 			LayersListWidget layers = new LayersListWidget ();
 			DockItem layers_item = dock.AddItem ("Layers");
