@@ -74,6 +74,8 @@ namespace Pinta
 			this.Icon = PintaCore.Resources.GetIcon ("Pinta.png");
 			canvas.IsFocus = true;
 
+			UpdateRulerRange ();
+
 			dialog_handler = new DialogHandlers (this);
 			PintaCore.Actions.View.ZoomToWindow.Activated += new EventHandler (ZoomToWindow_Activated);
 
@@ -407,21 +409,30 @@ namespace Pinta
 			sw.Hadjustment.ValueChanged += delegate {
 				UpdateRulerRange ();
 			};
+
 			sw.Vadjustment.ValueChanged += delegate {
 				UpdateRulerRange ();
 			};
-
-			//UpdateRulerRange ();
 			
-			PintaCore.Actions.View.ZoomComboBox.ComboBox.Changed += delegate {
+			//PintaCore.Actions.View.ZoomComboBox.ComboBox.Changed += delegate {
+			PintaCore.Workspace.CanvasSizeChanged += delegate {
 				UpdateRulerRange ();
 			};
 
-			mainTable.Attach (sw, 1, 2, 1, 2, AttachOptions.Shrink | AttachOptions.Fill, AttachOptions.Shrink | AttachOptions.Fill, 0, 0);
+			canvas.MotionNotifyEvent += delegate(object o, MotionNotifyEventArgs args) {
+
+				Cairo.PointD point = PintaCore.Workspace.WindowPointToCanvas (args.Event.X, args.Event.Y);
+	
+				hruler.Position = point.X;
+				vruler.Position = point.Y;
+
+			};
+			mainTable.Attach (sw, 1, 2, 1, 2, AttachOptions.Expand | AttachOptions.Fill, AttachOptions.Expand | AttachOptions.Fill, 0, 0);
 
 			sw.Add (vp);
 			vp.Add (canvas);
 
+			mainTable.ShowAll ();
 			canvas.Show ();
 			vp.Show ();
 
@@ -529,7 +540,7 @@ namespace Pinta
 			}
 		}
 
-		void UpdateRulerRange ()
+		public void UpdateRulerRange ()
 		{
 			Gtk.Main.Iteration (); //Force update of scrollbar upper before recenter
 
@@ -556,11 +567,6 @@ namespace Pinta
 			hruler.SetRange (lower.X, upper.X, 0, upper.X);
 			vruler.SetRange (lower.Y, upper.Y, 0, upper.Y);
 		}
-		protected virtual void HandleScroll (object o, Gtk.ScrollChildArgs args)
-		{
-			UpdateRulerRange ();
-		}
-
 		#endregion
 	}
 }

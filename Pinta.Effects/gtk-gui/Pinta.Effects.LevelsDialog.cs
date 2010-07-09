@@ -342,7 +342,7 @@ namespace Pinta.Effects
 			w24.Expand = false;
 			w24.Fill = false;
 			// Container child vboxOutputSpin.Gtk.Box+BoxChild
-			this.spinOutGamma = new global::Gtk.SpinButton (0, 100, 0.1);
+			this.spinOutGamma = new global::Gtk.SpinButton (0, 100, 1);
 			this.spinOutGamma.CanFocus = true;
 			this.spinOutGamma.Name = "spinOutGamma";
 			this.spinOutGamma.Adjustment.PageIncrement = 10;
@@ -549,7 +549,7 @@ namespace Pinta.Effects
 			this.buttonDummy.CanFocus = true;
 			this.buttonDummy.Name = "buttonDummy";
 			this.buttonDummy.UseUnderline = true;
-			this.buttonDummy.Label = "In stetic action button box cannot be empty";
+			this.buttonDummy.Label = global::Mono.Unix.Catalog.GetString ("In stetic action button box cannot be empty");
 			this.AddActionWidget (this.buttonDummy, -5);
 			global::Gtk.ButtonBox.ButtonBoxChild w47 = ((global::Gtk.ButtonBox.ButtonBoxChild)(w46[this.buttonDummy]));
 			w47.Expand = false;
