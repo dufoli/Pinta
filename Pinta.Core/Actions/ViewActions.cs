@@ -93,8 +93,8 @@ namespace Pinta.Core
 			menu.Append (ActualSize.CreateAcceleratedMenuItem (Gdk.Key.A, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask));
 			menu.AppendSeparator ();
 			menu.Append (PixelGrid.CreateMenuItem ());
-			menu.Append (Fullscreen.CreateAcceleratedMenuItem (Gdk.Key.F11, Gdk.ModifierType.None));
 			menu.Append (Rulers.CreateMenuItem ());
+			menu.Append (Fullscreen.CreateAcceleratedMenuItem (Gdk.Key.F11, Gdk.ModifierType.None));
 			menu.AppendSeparator ();
 			menu.Append (Pixels.CreateMenuItem ());
 			menu.Append (Inches.CreateMenuItem ());
@@ -110,7 +110,7 @@ namespace Pinta.Core
 			toolbar.AppendItem (new Gtk.SeparatorToolItem ());
 			toolbar.AppendItem (PixelGrid.CreateToolBarItem ());
 			toolbar.AppendItem (Rulers.CreateToolBarItem ());
-			toolbar.AppendItem (new ToolBarLabel (" Units:  "));
+			toolbar.AppendItem (new ToolBarLabel (string.Format (" {0}:  ", Catalog.GetString ("Units"))));
 			toolbar.AppendItem (UnitComboBox);
 		}
 		
@@ -139,7 +139,6 @@ namespace Pinta.Core
 
 				isFullscreen = !isFullscreen;
 			};
-
 		}
 
 		private string temp_zoom;
