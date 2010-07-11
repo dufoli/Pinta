@@ -41,6 +41,9 @@ namespace Pinta
 			main_window = window;
 			
 			PintaCore.Actions.File.New.Activated += HandlePintaCoreActionsFileNewActivated;
+			PintaCore.Actions.File.ModifyCompression += new EventHandler<ModifyCompressionEventArgs> (FileActions_ModifyCompression);
+			
+			PintaCore.Actions.Edit.ResizePalette.Activated += HandlePintaCoreActionsEditResizePaletteActivated;
 			
 			PintaCore.Actions.Image.Resize.Activated += HandlePintaCoreActionsImageResizeActivated;
 			PintaCore.Actions.Image.CanvasSize.Activated += HandlePintaCoreActionsImageCanvasSizeActivated;
@@ -102,6 +105,19 @@ namespace Pinta
 			if (response == (int)Gtk.ResponseType.Ok)
 				PintaCore.Actions.File.NewFile (new Gdk.Size (dialog.NewImageWidth, dialog.NewImageHeight));
 
+			dialog.Destroy ();
+		}
+
+		private void HandlePintaCoreActionsEditResizePaletteActivated (object sender, EventArgs e)
+		{
+			SpinButtonEntryDialog dialog = new SpinButtonEntryDialog (Catalog.GetString ("Resize Palette"),
+					PintaCore.Chrome.MainWindow, Catalog.GetString ("New palette size:"), 1, 96,
+					PintaCore.Palette.CurrentPalette.Count);
+			
+			if (dialog.Run () == (int) ResponseType.Ok) {
+				PintaCore.Palette.CurrentPalette.Resize (dialog.GetValue ());
+			}
+			
 			dialog.Destroy ();
 		}
 
@@ -238,6 +254,20 @@ namespace Pinta
 		private void HandlePixelsActivated (object sender, EventArgs e)
 		{
 			main_window.ChangeRulersUnit (Gtk.MetricType.Pixels);
+		}
+
+		private void FileActions_ModifyCompression (object sender, ModifyCompressionEventArgs e)
+		{
+			JpegCompressionDialog dlg = new JpegCompressionDialog (e.Quality);
+
+			try {
+				if (dlg.Run () == (int)Gtk.ResponseType.Ok)
+					e.Quality = dlg.GetCompressionLevel ();
+				else
+					e.Cancel = true;
+			} finally {
+				dlg.Destroy ();
+			}
 		}
 		#endregion
 	}
