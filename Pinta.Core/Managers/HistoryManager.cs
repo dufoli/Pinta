@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Gtk;
+using System.IO;
 
 namespace Pinta.Core
 {
@@ -149,7 +150,46 @@ namespace Pinta.Core
 			PintaCore.Actions.Edit.Redo.Sensitive = false;
 			PintaCore.Actions.Edit.Undo.Sensitive = false;
 		}
-		
+
+		//TODO migrate all the code to use binary writer / reader
+
+		public void Save (string fileName)
+		{
+			BinaryWriter writer = new BinaryWriter (File.Open(fileName, FileMode.Create));
+
+			writer.Write (string.Format ("Pinta history"));
+			writer.Write (historyPointer);
+			writer.Write (history.Count);
+
+			foreach (BaseHistoryItem item in history)
+				item.Save (writer);
+
+			writer.Close ();
+		}
+
+		public bool Load (string fileName)
+		{
+			if (!File.Exists (fileName))
+				return false;
+
+			BinaryReader reader = new BinaryReader (File.Open(fileName, FileMode.Open));
+			try {
+				if (!reader.ReadString ().StartsWith("Pinta history"))
+					return false;
+				historyPointer = reader.ReadInt32 ();
+				int count = reader.ReadInt32 ();
+				for (int i = 0; i < count; i++)
+				{
+					history.Add(BaseHistoryItem.Load(reader));
+				}
+			} catch {
+				return false;
+			} finally {
+				reader.Close ();
+			}
+			return true;
+		}
+
 		#region Protected Methods
 		protected void OnHistoryItemAdded (BaseHistoryItem item)
 		{

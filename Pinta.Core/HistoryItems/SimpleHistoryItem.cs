@@ -26,6 +26,7 @@
 
 using System;
 using Cairo;
+using System.IO;
 
 namespace Pinta.Core
 {
@@ -88,6 +89,27 @@ namespace Pinta.Core
 		{
 			layer_index = PintaCore.Layers.IndexOf (layer);;
 			old_surface = layer.Surface.Clone ();
+		}
+
+		public override void LoadInternal (BinaryReader reader)
+		{
+			base.LoadInternal (reader);
+			int len = reader.ReadInt32 ();
+			int width = reader.ReadInt32 ();
+			int height = reader.ReadInt32 ();
+			int stride = reader.ReadInt32 ();
+			old_surface = new ImageSurface(reader.ReadBytes (len), Format.Argb32, width, height, stride);
+			layer_index = reader.ReadInt32 ();
+		}
+		public override void Save (BinaryWriter writer)
+		{
+			base.Save (writer);
+			writer.Write (old_surface.Data.Length);
+			writer.Write (old_surface.Width);
+			writer.Write (old_surface.Height);
+			writer.Write (old_surface.Stride);
+			writer.Write (old_surface.Data, 0, old_surface.Data.Length);
+			writer.Write (layer_index);
 		}
 	}
 }
