@@ -11,6 +11,7 @@ using System;
 using Pinta.Gui.Widgets;
 using Cairo;
 using Pinta.Core;
+using Mono.Unix;
 
 namespace Pinta.Effects
 {
@@ -22,7 +23,7 @@ namespace Pinta.Effects
 		}
 
 		public override string Text {
-			get { return Mono.Unix.Catalog.GetString ("Radial Blur"); }
+			get { return Catalog.GetString ("Radial Blur"); }
 		}
 
 		public override bool IsConfigurable {
@@ -30,7 +31,7 @@ namespace Pinta.Effects
 		}
 
 		public override string EffectMenuCategory {
-			get { return "Blurs"; }
+			get { return Catalog.GetString ("Blurs"); }
 		}
 
 		public RadialBlurData Data { get { return EffectData as RadialBlurData; } }
@@ -160,7 +161,7 @@ namespace Pinta.Effects
 			public PointD Offset = new PointD (0, 0);
 
 			[MinimumValue (1), MaximumValue (5)]
-			[Hint ("\nUse low quality for previews, small images, and small angles.  Use high quality for final quality, large images, and large angles.")]
+			[Hint ("Use low quality for previews, small images, and small angles.  Use high quality for final quality, large images, and large angles.")]
 			public int Quality = 2;
 			
 			[Skip]

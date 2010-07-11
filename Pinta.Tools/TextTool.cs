@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using Gdk;
 using Gtk;
 using Pinta.Core;
+using Mono.Unix;
 
 namespace Pinta.Tools
 {
@@ -33,18 +34,25 @@ namespace Pinta.Tools
 		}
 
 		public override string Name {
-			get { return "Text"; }
+			get { return Catalog.GetString ("Text"); }
 		}
 		public override string Icon {
 			get { return "Tools.Text.png"; }
 		}
 
 		public override string StatusBarText {
-			get { return "Left click to place cursor, then type desired text. Text color is primary color."; }
+			get { return Catalog.GetString ("Left click to place cursor, then type desired text. Text color is primary color."); }
 		}
 		public override Gdk.Key ShortcutKey { get { return Gdk.Key.T; } }
 		public override int Priority { get { return 37; } }
 
+		protected override bool ShowAlphaBlendingButton {
+			get { return true; }
+		}
+
+		protected override bool ShowAntialiasingButton {
+			get { return true; }
+		}
 
 		//private string statusBarTextFormat = PdnResources.GetString("TextTool.StatusText.TextInfo.Format");
 		private Cairo.PointD startMouseXY;
@@ -118,6 +126,16 @@ namespace Pinta.Tools
 		private ToolBarToggleButton left_alignment_btn;
 		private ToolBarToggleButton center_alignment_btn;
 		private ToolBarToggleButton Right_alignment_btn;
+		private ToolBarLabel spacer_label;
+
+		protected void RenderFont (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter)
+		{
+			string fontName = (string)model.GetValue (iter, 0);
+			Gtk.CellRendererText cell = renderer as Gtk.CellRendererText;
+			cell.Text = fontName;
+			cell.Font = string.Format ("{0} 10", fontName);
+			cell.Family = fontName;
+		}
 
 		protected override void OnBuildToolBar (Gtk.Toolbar tb)
 		{
@@ -127,7 +145,7 @@ namespace Pinta.Tools
 			base.OnBuildToolBar (tb);
 			
 			if (font_label == null)
-				font_label = new ToolBarLabel (" Font: ");
+				font_label = new ToolBarLabel (string.Format (" {0}: ", Catalog.GetString ("Font")));
 			
 			tb.AppendItem (font_label);
 			
@@ -147,12 +165,18 @@ namespace Pinta.Tools
 				//this exception do not occure when I put a try catch ;(
 				try {
 					if (font_combo == null) {
-						font_combo = new ToolBarComboBox (100, index, false, entries.ToArray ());
+						font_combo = new ToolBarComboBox (150, index, false, entries.ToArray ());
 						font_combo.ComboBox.Changed += HandleFontChanged;
+						font_combo.ComboBox.SetCellDataFunc (font_combo.CellRendererText, new CellLayoutDataFunc (RenderFont));
 					}
 					
 					tb.AppendItem (font_combo);
-					
+
+					if (spacer_label == null)
+						spacer_label = new ToolBarLabel (" ");
+
+					tb.AppendItem (spacer_label);
+				
 					//size depend on font and modifier (italic, bold,...)
 					Pango.FontFamily fam = fonts.Find (f => f.Name == font_combo.ComboBox.ActiveText);
 					
@@ -182,14 +206,14 @@ namespace Pinta.Tools
 			tb.AppendItem (new SeparatorToolItem ());
 			
 			if (bold_btn == null) {
-				bold_btn = new ToolBarToggleButton ("Toolbar.Bold.png", "Bold", "Bold the text");
+				bold_btn = new ToolBarToggleButton ("Toolbar.Bold.png", Catalog.GetString ("Bold"), Catalog.GetString ("Bold"));
 				bold_btn.Toggled += HandleBoldButtonToggled;
 			}
 			
 			tb.AppendItem (bold_btn);
 			
 			if (italic_btn == null) {
-				italic_btn = new ToolBarToggleButton ("Toolbar.Italic.png", "Italic", "Italic the text");
+				italic_btn = new ToolBarToggleButton ("Toolbar.Italic.png", Catalog.GetString ("Italic"), Catalog.GetString ("Italic"));
 				italic_btn.Toggled += HandleItalicButtonToggled;
 				;
 			}
@@ -197,7 +221,7 @@ namespace Pinta.Tools
 			tb.AppendItem (italic_btn);
 			
 			if (underscore_btn == null) {
-				underscore_btn = new ToolBarToggleButton ("Toolbar.Underline.png", "Uncerline", "Underline the text");
+				underscore_btn = new ToolBarToggleButton ("Toolbar.Underline.png", Catalog.GetString ("Underline"), Catalog.GetString ("Underline"));
 				underscore_btn.Toggled += HandleUnderscoreButtonToggled;
 			}
 			
@@ -206,7 +230,7 @@ namespace Pinta.Tools
 			tb.AppendItem (new SeparatorToolItem ());
 			
 			if (left_alignment_btn == null) {
-				left_alignment_btn = new ToolBarToggleButton ("Toolbar.LeftAlignment.png", "Align left", "Align text to left");
+				left_alignment_btn = new ToolBarToggleButton ("Toolbar.LeftAlignment.png", Catalog.GetString ("Left Align"), Catalog.GetString ("Left Align"));
 				left_alignment_btn.Active = true;
 				left_alignment_btn.Toggled += HandleLeftAlignmentButtonToggled;
 				;
@@ -215,7 +239,7 @@ namespace Pinta.Tools
 			tb.AppendItem (left_alignment_btn);
 			
 			if (center_alignment_btn == null) {
-				center_alignment_btn = new ToolBarToggleButton ("Toolbar.CenterAlignment.png", "Align center", "Align text to center");
+				center_alignment_btn = new ToolBarToggleButton ("Toolbar.CenterAlignment.png", Catalog.GetString ("Center Align"), Catalog.GetString ("Center Align"));
 				center_alignment_btn.Toggled += HandleCenterAlignmentButtonToggled;
 				;
 			}
@@ -223,7 +247,7 @@ namespace Pinta.Tools
 			tb.AppendItem (center_alignment_btn);
 			
 			if (Right_alignment_btn == null) {
-				Right_alignment_btn = new ToolBarToggleButton ("Toolbar.RightAlignment.png", "Align right", "Align text to right");
+				Right_alignment_btn = new ToolBarToggleButton ("Toolbar.RightAlignment.png", Catalog.GetString ("Right Align"), Catalog.GetString ("Right Align"));
 				Right_alignment_btn.Toggled += HandleRightAlignmentButtonToggled;
 				;
 			}
@@ -874,12 +898,12 @@ namespace Pinta.Tools
 			Rectangle dstRect = new Rectangle (pt, measuredSize);
 			//Rectangle dstRectClipped = Rectangle.Intersect(dstRect, ScratchSurface.Bounds);
 						/*
-            if (dstRectClipped.Width == 0 || dstRectClipped.Height == 0)
-            {
-                return;
-            }
+			if (dstRectClipped.Width == 0 || dstRectClipped.Height == 0)
+			{
+				return;
+			}
 			 */
-using (Cairo.ImageSurface surface = new Cairo.ImageSurface (Cairo.Format.Argb32, 8, 8)) {
+			using (Cairo.ImageSurface surface = new Cairo.ImageSurface (Cairo.Format.Argb32, 8, 8)) {
 				using (Cairo.Context context = new Cairo.Context (surface)) {
 					context.FillRectangle (new Cairo.Rectangle (0, 0, surface.Width, surface.Height), color);
 				}
@@ -915,7 +939,7 @@ using (Cairo.ImageSurface surface = new Cairo.ImageSurface (Cairo.Format.Argb32,
 					using (Cairo.Context ctx = new Cairo.Context (PintaCore.Layers.ToolLayer.Surface)) {
 						Cairo.TextExtents te = TextExtents (ctx, text);
 						//new Cairo.PointD(dstRect.X - dstRectClipped.X + offset, dstRect.Y - dstRectClipped.Y),
-						ctx.DrawText (new Cairo.PointD (dstRect.X + offset - te.XBearing, dstRect.Y - te.YBearing), textFont, FontSlant, FontWeight, FontSize, PintaCore.Palette.PrimaryColor, text);
+						ctx.DrawText (new Cairo.PointD (dstRect.X + offset - te.XBearing, dstRect.Y - te.YBearing), textFont, FontSlant, FontWeight, FontSize, PintaCore.Palette.PrimaryColor, text, antiAliasing);
 						
 						if (underscore_btn.Active) {
 							int lineSize = 1;
@@ -944,8 +968,7 @@ using (Cairo.ImageSurface surface = new Cairo.ImageSurface (Cairo.Format.Argb32,
 				
 				int xEnd = Math.Min (dst.Width, pt.X + measuredSize.Width);
 				
-				bool blending = false;
-				//AppEnvironment.AlphaBlending;
+				bool blending = alphablending_btn.Active;
 				//if (dst.IsColumnVisible(pt.X + skipX))
 				//{
 				for (int y = pt.Y; y < pt.Y + measuredSize.Height; ++y) {
@@ -1126,8 +1149,7 @@ using (Cairo.ImageSurface surface = new Cairo.ImageSurface (Cairo.Format.Argb32,
 
 		private void RenderText (Cairo.ImageSurface surf, int lineNumber)
 		{
-			DrawText (surf, this.Font, (string)this.lines[lineNumber], this.uls[lineNumber], this.sizes[lineNumber], false, PintaCore.Palette.PrimaryColor);
-			//antialiasing hardcoded for moment
+			DrawText (surf, this.Font, (string)this.lines[lineNumber], this.uls[lineNumber], this.sizes[lineNumber], antialiasing_btn.Active, PintaCore.Palette.PrimaryColor);
 		}
 		/*
         private void PlaceMoveNub()
@@ -1678,7 +1700,7 @@ this.OnKeyPress (canvas, args);
 			byte[] bytes = { (byte) c, (byte) (c >> 8), (byte) (c >> 16), (byte) (c >> 24) };
 			string unicodeChar = System.Text.Encoding.UTF32.GetString (bytes);
 		
-			lines[linePos] = ((string)lines[linePos]).Insert (textPos, ((char)c).ToString ());
+			lines[linePos] = ((string)lines[linePos]).Insert (textPos, unicodeChar);
 			this.sizes = null;
 		}
 		

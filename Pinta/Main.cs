@@ -29,6 +29,9 @@ using Gtk;
 using Mono.Options;
 using System.Collections.Generic;
 using Pinta.Core;
+using Mono.Unix;
+using System.IO;
+using System.Reflection;
 
 namespace Pinta
 {
@@ -36,10 +39,33 @@ namespace Pinta
 	{
 		public static void Main (string[] args)
 		{
+			string app_dir = Path.GetDirectoryName (Assembly.GetExecutingAssembly ().Location);
+			string locale_dir;
+			bool devel_mode = File.Exists (Path.Combine (Path.Combine (app_dir, ".."), "Pinta.sln"));
+			
+			if (Platform.GetOS () != Platform.OS.X11 || devel_mode)
+				locale_dir = Path.Combine (app_dir, "locale");	
+			else {
+				// From MonoDevelop:
+				// Pinta is located at $prefix/lib/pinta
+				// adding "../.." should give us $prefix
+				string prefix = Path.Combine (Path.Combine (app_dir, ".."), "..");
+				//normalise it
+				prefix = Path.GetFullPath (prefix);
+				//catalog is installed to "$prefix/share/locale" by default
+				locale_dir = Path.Combine (Path.Combine (prefix, "share"), "locale");
+			}
+
+			try {
+				Catalog.Init ("pinta", locale_dir);
+			} catch (Exception ex) {
+				Console.WriteLine (ex);
+			}
+
 			int threads = -1;
 			
 			var p = new OptionSet () {
-				{ "rt|render-threads=", "number of threads to use for rendering", (int v) => threads = v }
+				{ "rt|render-threads=", Catalog.GetString ("number of threads to use for rendering"), (int v) => threads = v }
 			};
 
 			List<string> extra;
@@ -93,7 +119,7 @@ namespace Pinta
 			Exception ex = (Exception)args.ExceptionObject;
 			
 			try {
-				errorDialog.Message = string.Format ("Unhandled exception:\n{0}", ex.Message);
+				errorDialog.Message = string.Format ("{0}:\n{1}", "Unhandled exception", ex.Message);
 				errorDialog.AddDetails (ex.ToString (), false);
 				errorDialog.Run ();
 			} finally {

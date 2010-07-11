@@ -27,6 +27,7 @@
 using System;
 using Cairo;
 using Pinta.Core;
+using Mono.Unix;
 
 namespace Pinta.Tools
 {
@@ -40,13 +41,13 @@ namespace Pinta.Tools
 
 		#region Properties
 		public override string Name {
-			get { return "Color Picker"; }
+			get { return Catalog.GetString ("Color Picker"); }
 		}
 		public override string Icon {
 			get { return "Tools.ColorPicker.png"; }
 		}
 		public override string StatusBarText {
-			get { return "Left click to set primary color. Right click to set secondary color."; }
+			get { return Catalog.GetString ("Left click to set primary color. Right click to set secondary color."); }
 		}
 		public override Gdk.Key ShortcutKey { get { return Gdk.Key.K; } }
 		public override int Priority { get { return 31; } }
@@ -58,13 +59,13 @@ namespace Pinta.Tools
 			base.OnBuildToolBar (tb);
 
 			if (tool_select_label == null)
-				tool_select_label = new ToolBarLabel (" After select:  ");
+				tool_select_label = new ToolBarLabel (string.Format (" {0}: ", Catalog.GetString ("After select")));
 
 			tb.AppendItem (tool_select_label);
 
 			// TODO: Enable when we have the Pencil tool
 			if (tool_select == null)
-				tool_select = new ToolBarComboBox (170, 0, false, "Do not switch tool", "Switch to previous tool");//, "Switch to Pencil tool");
+				tool_select = new ToolBarComboBox (170, 0, false, Catalog.GetString ("Do not switch tool"), Catalog.GetString ("Switch to previous tool"), Catalog.GetString ("Switch to Pencil tool"));
 
 			tb.AppendItem (tool_select);
 		}
@@ -112,7 +113,7 @@ namespace Pinta.Tools
 			if (tool_select.ComboBox.Active == 1)
 				PintaCore.Tools.SetCurrentTool (PintaCore.Tools.PreviousTool);
 			else if (tool_select.ComboBox.Active == 2)
-				PintaCore.Tools.SetCurrentTool ("Pencil");
+				PintaCore.Tools.SetCurrentTool (Catalog.GetString ("Pencil"));
 		}
 		#endregion
 	}
