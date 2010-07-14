@@ -73,5 +73,17 @@ namespace Pinta.Core
 			old_path = PintaCore.Layers.SelectionPath.Clone ();
 			old_offset = PintaCore.Layers.SelectionLayer.Offset;
 		}
+
+		public override void LoadInternal (System.IO.BinaryReader reader)
+		{
+			//base.LoadInternal (reader);
+			//inactive because path is not serialisable
+		}
+		public override void Save (System.IO.BinaryWriter writer)
+		{
+			//base.Save (writer);
+			//inactive because path is not serialisable
+		}
+
 	}
 }

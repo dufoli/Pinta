@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using Mono.Unix;
+using System.IO;
 
 namespace Pinta.Core
 {
@@ -100,6 +101,20 @@ namespace Pinta.Core
 				(RestorePath as IDisposable).Dispose ();
 				RestorePath = null;
 			}
+		}
+
+		public override void LoadInternal (BinaryReader reader)
+		{
+			base.LoadInternal (reader);
+			old_width = reader.ReadInt32 ();
+			old_height = reader.ReadInt32 ();
+		}
+
+		public override void Save (BinaryWriter writer)
+		{
+			base.Save (writer);
+			writer.Write (old_width);
+			writer.Write (old_height);
 		}
 	}
 }

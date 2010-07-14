@@ -595,9 +595,9 @@ namespace Pinta.Core
 		}
 		
 		public static double Magnitude(this PointD p)
-        {
-            return Math.Sqrt(p.X * p.X + p.Y * p.Y);
-        }
+		{
+			return Math.Sqrt(p.X * p.X + p.Y * p.Y);
+		}
 
 		public static Cairo.Rectangle ToCairoRectangle (this Gdk.Rectangle r)
 		{

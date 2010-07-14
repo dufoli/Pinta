@@ -101,6 +101,7 @@ namespace Pinta.Core
 			old_surface = new ImageSurface(reader.ReadBytes (len), Format.Argb32, width, height, stride);
 			layer_index = reader.ReadInt32 ();
 		}
+		
 		public override void Save (BinaryWriter writer)
 		{
 			base.Save (writer);

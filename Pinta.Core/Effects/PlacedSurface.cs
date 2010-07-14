@@ -35,6 +35,7 @@ namespace Pinta.Core
 
                 return where;
             }
+            set { where = value;}
         }
 
         public ImageSurface What
@@ -48,6 +49,7 @@ namespace Pinta.Core
 
                 return what;
             }
+            set { what = value;}
         }
 
         public Gdk.Size Size
@@ -153,12 +155,12 @@ namespace Pinta.Core
         public PlacedSurface(ImageSurface source, Gdk.Rectangle roi)
         {
             where = roi.Location;
-			what = new ImageSurface(Format.Argb32, roi.Width, roi.Height);
-			
-			using (Context g = new Context (what)) {
-				g.SetSourceSurface (source, -roi.X, -roi.Y);
-				g.Paint ();
-			}
+            what = new ImageSurface(Format.Argb32, roi.Width, roi.Height);
+	
+            using (Context g = new Context (what)) {
+                g.SetSourceSurface (source, -roi.X, -roi.Y);
+                g.Paint ();
+            }
         }
 
         private PlacedSurface(PlacedSurface ps)
@@ -167,7 +169,7 @@ namespace Pinta.Core
             what = ps.What.Clone();
         }
 
-        private PlacedSurface()
+        public PlacedSurface()
         {
         }
 
