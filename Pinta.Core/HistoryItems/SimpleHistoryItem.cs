@@ -45,6 +45,11 @@ namespace Pinta.Core
 		{
 		}
 
+		//needed for persistence layer
+		public SimpleHistoryItem ()
+		{
+		}
+
 		public override void Undo ()
 		{
 			// Grab the original surface

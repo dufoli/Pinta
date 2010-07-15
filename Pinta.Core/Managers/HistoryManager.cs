@@ -38,12 +38,15 @@ namespace Pinta.Core
 	{
 		public Gtk.ListStore ListStore { get; private set; }
 		
-		List<BaseHistoryItem> history = new List<BaseHistoryItem> ();
+		List<ProxyHistoryItem> history = new List<ProxyHistoryItem> ();
 		int historyPointer = -1;
-		
+		FileStream stream;
+		readonly int MemoryStackSize = 10;
+
 		public HistoryManager ()
 		{
 			ListStore = new ListStore (typeof (BaseHistoryItem));
+			stream = File.Open("history.dat", FileMode.Create, FileAccess.ReadWrite);
 		}
 		
 		public int Pointer {
@@ -58,7 +61,9 @@ namespace Pinta.Core
 					return null;
 			}
 		}
-		
+
+		internal FileStream Cache { get { return stream; } }
+
 		public void PushNewItem (BaseHistoryItem new_item)
 		{
 			
@@ -79,8 +84,9 @@ namespace Pinta.Core
 			}
 		
 			//Add new undo to ListStore
-			new_item.Id = ListStore.AppendValues (new_item);
-			history.Add (new_item);
+			ProxyHistoryItem item2 = new ProxyHistoryItem(new_item);
+			new_item.Id = ListStore.AppendValues (item2);
+			history.Add (item2);
 			historyPointer = history.Count - 1;
 			
 			if (new_item.CausesDirty)
@@ -90,6 +96,10 @@ namespace Pinta.Core
 				PintaCore.Actions.Edit.Undo.Sensitive = true;
 				
 			PintaCore.Actions.Edit.Redo.Sensitive = false;
+
+			if (history.Count > MemoryStackSize)
+				history[history.Count - MemoryStackSize - 1].Save();
+
 			OnHistoryItemAdded (new_item);
 		}
 		
@@ -98,7 +108,7 @@ namespace Pinta.Core
 			if (historyPointer < 0) {
 				throw new InvalidOperationException ("Undo stack is empty");
 			} else {
-				BaseHistoryItem item = history[historyPointer];
+				ProxyHistoryItem item = history[historyPointer];
 				item.Undo ();
 				item.State = HistoryItemState.Redo;
 				ListStore.SetValue (item.Id, 0, item);
@@ -121,7 +131,7 @@ namespace Pinta.Core
 				throw new InvalidOperationException ("Redo stack is empty");
 
 			historyPointer++;
-			BaseHistoryItem item = history[historyPointer];
+			ProxyHistoryItem item = history[historyPointer];
 			item.Redo ();
 			item.State = HistoryItemState.Undo;
 			ListStore.SetValue (item.Id, 0, item);
@@ -141,7 +151,7 @@ namespace Pinta.Core
 		
 		public void Clear ()
 		{
-			history.ForEach (delegate(BaseHistoryItem item) { item.Dispose (); } );
+			history.ForEach (delegate(ProxyHistoryItem item) { item.Dispose (); } );
 			history.Clear();	
 			ListStore.Clear ();	
 			historyPointer = -1;
@@ -149,11 +159,13 @@ namespace Pinta.Core
 			PintaCore.Workspace.IsDirty = false;
 			PintaCore.Actions.Edit.Redo.Sensitive = false;
 			PintaCore.Actions.Edit.Undo.Sensitive = false;
+
+			stream.Seek (0, SeekOrigin.Begin);
 		}
 
 		//TODO migrate all the code to use binary writer / reader
 
-		public void Save (string fileName)
+		/*public void Save (string fileName)
 		{
 			BinaryWriter writer = new BinaryWriter (File.Open(fileName, FileMode.Create));
 
@@ -188,7 +200,7 @@ namespace Pinta.Core
 				reader.Close ();
 			}
 			return true;
-		}
+		}*/
 
 		#region Protected Methods
 		protected void OnHistoryItemAdded (BaseHistoryItem item)

@@ -69,7 +69,7 @@ namespace Pinta.Core
 
 		public virtual void Save (BinaryWriter writer)
 		{
-			writer.Write (this.GetType().Name);
+			writer.Write (this.GetType().FullName);
 			writer.Write (Icon);
 			writer.Write (Text);
 			writer.Write (State == HistoryItemState.Redo? "REDO":"UNDO");
