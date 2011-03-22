@@ -50,8 +50,14 @@ namespace Pinta.Tools
 			// Ignore extra button clicks while drawing
 			if (is_drawing)
 				return;
-		
-			shape_origin = point;
+
+			Document doc = PintaCore.Workspace.ActiveDocument;
+
+			// Selection is around the pixel selection so add 1 pixel
+			double x = Utility.Clamp (point.X, 0, doc.ImageSize.Width);
+			double y = Utility.Clamp (point.Y, 0, doc.ImageSize.Height);
+			shape_origin = new PointD (x, y);
+
 			is_drawing = true;
 			
 			hist = new SelectionHistoryItem (Icon, Name);
@@ -87,8 +93,8 @@ namespace Pinta.Tools
 
 			Document doc = PintaCore.Workspace.ActiveDocument;
 
-			double x = Utility.Clamp (point.X, 0, doc.ImageSize.Width - 1);
-			double y = Utility.Clamp (point.Y, 0, doc.ImageSize.Height - 1);
+			double x = Utility.Clamp (point.X, 0, doc.ImageSize.Width);
+			double y = Utility.Clamp (point.Y, 0, doc.ImageSize.Height);
 
 			doc.ShowSelection = true;
 
