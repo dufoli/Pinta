@@ -127,6 +127,17 @@ namespace Pinta.Core
 		{
 			OnKeyUp (canvas, args);
 		}
+
+		public virtual bool TryHandlePaste (Clipboard cb)
+		{
+			return false;
+		}
+
+		public virtual bool TryHandleCopy (Clipboard cb)
+		{
+			return false;
+		}
+
 		#endregion
 
 		#region Protected Methods
