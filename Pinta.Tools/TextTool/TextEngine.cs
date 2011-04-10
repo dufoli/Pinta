@@ -527,7 +527,7 @@ namespace Pinta.Tools
 			int TextPosLenght = len;
 			int currentLinePos = startLine;
 
-			while (strTextPos + TextPosLenght > lines[currentLinePos].Length) {					
+			while (strTextPos + TextPosLenght > lines[currentLinePos].Length) {
 				action (currentLinePos, strTextPos, lines[currentLinePos].Length);
 				TextPosLenght -= lines[currentLinePos].Length - strTextPos + 1;
 				currentLinePos++;
@@ -584,7 +584,7 @@ namespace Pinta.Tools
 		private string GetText (int startLine, int startPos, int len)
 		{
 			StringBuilder strbld = new StringBuilder ();
-			ForeachLine (startLine, startPos, len, (currentLinePos, strpos, endpos) =>{ 
+			ForeachLine (startLine, startPos, len, (currentLinePos, strpos, endpos) =>{
 			    if (endpos - strpos > 0)
 			        strbld.AppendLine(lines[currentLinePos].Substring (strpos, endpos - strpos));
 			});
