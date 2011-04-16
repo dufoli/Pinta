@@ -83,9 +83,15 @@ namespace Pinta
 		{
 			NewImageDialog dialog = new NewImageDialog ();
 
-			dialog.NewImageWidth = PintaCore.Settings.GetSetting<int> ("new-image-width", 800);
-			dialog.NewImageHeight = PintaCore.Settings.GetSetting<int> ("new-image-height", 600);
-
+			Gtk.Clipboard cb = Gtk.Clipboard.Get (Gdk.Atom.Intern ("CLIPBOARD", false));
+			Gdk.Pixbuf image = cb.WaitForImage ();
+			if (image != null) {
+				dialog.NewImageWidth = image.Width;
+				dialog.NewImageHeight = image.Height;
+			} else {
+				dialog.NewImageWidth = PintaCore.Settings.GetSetting<int> ("new-image-width", 800);
+				dialog.NewImageHeight = PintaCore.Settings.GetSetting<int> ("new-image-height", 600);
+			}
 			dialog.ParentWindow = main_window.GdkWindow;
 			dialog.WindowPosition = Gtk.WindowPosition.CenterOnParent;
 
